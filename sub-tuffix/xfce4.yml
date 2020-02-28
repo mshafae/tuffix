@@ -1,3 +1,15 @@
-        - xfce4-goodies
-        - xfce4-weather-plugin
+#####################################################################
+# XFCE Extras
+# point person:
+#####################################################################
+
+- hosts: all
+  remote_user: root
+  tasks:
+
+    - name: XFCE Extras
+      apt:
+        pkg:
+          - xfce4-goodies
+          - xfce4-weather-plugin
 

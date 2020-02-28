@@ -1,10 +1,20 @@
+
+#####################################################################
+# Media Computation Tools
+# point person:
+#####################################################################
+
+- hosts: all
+  remote_user: root
+  tasks:
+
     - name: media computation tools
-      apt: name={{item}} state=present
-      with_items:
-        - audacity
-        - blender
-        - gimp
-        - imagemagick
-        - sox
-        - vlc
+      apt:
+        pkg:
+          - audacity
+          - blender
+          - gimp
+          - imagemagick
+          - sox
+          - vlc
 

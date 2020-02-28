@@ -8,11 +8,11 @@
   tasks:
 
     - name: 481 Languages possibly used for AI projects
-      apt: name={{item}} state=present
-      with_items:
-        - swi-prolog-x
-        - swi-prolog-nox
-        - sbcl
+      apt:
+        pkg:
+          - swi-prolog-x
+          - swi-prolog-nox
+          - sbcl
     - name: Eclipse installation
       unarchive:
         src: http://eclipse.bluemix.net/packages/2019-06/data/eclipse-java-2019-06-R-linux-gtk-x86_64.tar.gz
