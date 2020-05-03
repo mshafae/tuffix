@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# build the GUI and supress GTK warnings by sending them to /dev/null
+# there needs to be a better way of handling this directly in the C source file
+
+gcc example_gui.c -o example_gui `pkg-config --cflags --libs gtk+-2.0`
+./example_gui 2>/dev/null

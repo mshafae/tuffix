@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# rough prototype made by Jared Dyreson
+# link to my Linux init scripts
+# https://github.com/JaredDyreson/thin-mint
+
+# supported subcommands
+
+#init
+#add
+#remove
+#installed
+#available
+#describe
+#rekey
+
+. functions
+
+remove
