@@ -1,4 +1,4 @@
-
+// https://www.geeksforgeeks.org/how-to-create-gui-in-c-programming-using-gtk-toolkit/
 #include <gtk/gtk.h> 
   
 static int counter = 0; 
