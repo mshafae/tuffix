@@ -2,6 +2,7 @@
 
 # example debian build script we can use
 # this took me less than 20 minutes to come up with
+# https://askubuntu.com/questions/1130558/how-to-build-deb-package-for-ubuntu-18-04
 
 function build_(){
   base="tuffix-installer/"
