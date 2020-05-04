@@ -16,6 +16,8 @@ function build_(){
   sed -i "s/Version: .*/Version: $revision-$new_version/" "$base"/DEBIAN/control
   echo "$package_name".deb
   dpkg-deb --build "$base"
+  dpkg -i tuffix_installer.deb
+  dpkg --list | grep -i "tuffix"
 }
 
 function err_(){
