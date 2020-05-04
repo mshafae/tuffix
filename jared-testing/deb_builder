@@ -8,10 +8,12 @@ function build_(){
   base="tuffix-installer/"
   # copy all essenital files 
   cp -ar shell_scripts/hello  "$base"/usr/local/bin
+  revision="$(awk '/Version:/ {print $2}' "$base"/DEBIAN/control | cut -d "-" -f1)"
   current_version="$(awk '/Version:/ {print $2}' "$base"/DEBIAN/control | cut -d "-" -f2)"
   new_version=$((current_version+1))
-  package_name="com.csuf.tuffix_1.0-$new_version"
-  echo "$package_name"
+  package_name="com.csuf.tuffix_$revision-$new_version"
+  sed -i "s/Version: .*/Version: $revision-$new_version/" "$base"/DEBIAN/control
+  echo "$package_name".deb
   #dpkg-deb --build "$base"
 }
 
@@ -20,4 +22,5 @@ function err_(){
   exit
 }
 
-[[ "$(uname -a | grep -i "ubuntu")" ]] && build_ || err_
+#[[ "$(uname -a | grep -i "ubuntu")" ]] && build_ || err_
+build_
