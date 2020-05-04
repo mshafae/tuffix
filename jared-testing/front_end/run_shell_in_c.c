@@ -9,6 +9,7 @@ typedef struct installer_t {
   const char* package_manager;
   const char* arguments[BUFSIZ];
   const char* packages[BUFSIZ];
+  const char* command[BUFSIZ];
   int package_count, argument_count;
 } installer_t;
 
@@ -23,20 +24,18 @@ installer_t* installer_t_constructor(const char* pkg_man, int arg_counter, const
 }
 
 void installer_t_destructor(installer_t* inst){ free(inst); }
-void print_installer_t_command(installer_t* inst){
-  /*static char buffer[BUFSIZ];*/
-  /*strcat(buffer, inst->package_manager);*/
-  printf("%s ", inst->package_manager);
-  for(int i = 0; i < inst->argument_count; ++i){
-    printf("%s ", inst->arguments[i]);
+
+void build_installer_t_command(installer_t* inst){
+  char buffer[BUFSIZ];
+  sprintf(buffer, "%s", inst->package_manager);
+  for(int i = 0; i < inst->argument_count; ++i) { 
+    snprintf(buffer, strlen(buffer), "%s ", inst->arguments[i]);
+    /*strcat(buffer, inst->arguments[i]); */
   }
-  for(int i = 0; i < inst->package_count; ++i){
-    printf("%s ", inst->packages[i]);
-  }
-  printf("\n");
+  /*for(int i = 0; i < inst->package_count; ++i){ strcat(buffer, inst->packages[i]); }*/
+  printf("%s\n", buffer);
+  /*inst->command = strdup(buffer);*/
 }
-
-
 
 int main(){
 
@@ -49,7 +48,8 @@ int main(){
   };
 
   installer_t* inst = installer_t_constructor("apt-get", 2, arguments, 3, packages);
-  print_installer_t_command(inst);
+  build_installer_t_command(inst);
+  /*printf("%s\n", inst->command);*/
   installer_t_destructor(inst);
   /*int call = system("uname -a");*/
   /*printf("%d\n", call);*/

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# example debian build script we can use
+# this took me less than 20 minutes to come up with
+
+function build_(){
+  base="tuffix-installer/"
+  # copy all essenital files 
+  cp -ar shell_scripts/hello  "$base"/usr/local/bin
+  current_version="$(awk '/Version:/ {print $2}' "$base"/DEBIAN/control | cut -d "-" -f2)"
+  new_version=$((current_version+1))
+  package_name="com.csuf.tuffix_1.0-$new_version"
+  echo "$package_name"
+  #dpkg-deb --build "$base"
+}
+
+function err_(){
+  echo "please run on a debian machine"
+  exit
+}
+
+[[ "$(uname -a | grep -i "ubuntu")" ]] && build_ || err_

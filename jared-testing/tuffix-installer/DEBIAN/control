@@ -1,0 +1,8 @@
+Package: tuffix
+Version: 1.0-1
+Section: base
+Priority: optional
+Architecture: i386
+Depends: vim
+Maintainer: Jared Dyreson <jareddyreson@csu.fullerton.edu>
+Description: Linux configuration scripts for California State University Fullerton
