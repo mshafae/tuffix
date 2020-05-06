@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-# example debian build script we can use
-# this took me less than 20 minutes to come up with
-# https://askubuntu.com/questions/1130558/how-to-build-deb-package-for-ubuntu-18-04
 # please also make sure the packages are exectuable before building the package, or do this during the postinst script
+
+# dependencies for this script
+
+[[ ! $(dpkg --list | grep "dpkg-dev") ]] && sudo apt-get install dpkg-dev -y
 
 function build_(){
   base="tuffix-installer/"
@@ -14,7 +15,7 @@ function build_(){
   package_name="tuffix_"$revision-$new_version"_$arch"
   sed -i "s/Version: .*/Version: $revision-$new_version/" "$base"/DEBIAN/control
   echo "[+] Building $package_name.deb"
-  dpkg-deb --build "$base" "$package_name".deb
+  dpkg-deb --build "$base" "builds"/"$package_name".deb
 }
 
 function err_(){
@@ -22,9 +23,4 @@ function err_(){
   exit
 }
 
-#[[ "$(uname -a | grep -i "ubuntu")" ]] && build_ || err_
-build_
-
-
-# we are also setting the compat flag to 19 since we want to coerce the students to be using a major release greater than 19
-# please refer to ../tuffixize.sh:40
+[[ "$(uname -a | grep -i "ubuntu")" ]] && build_ || err_
