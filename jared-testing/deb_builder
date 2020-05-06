@@ -7,17 +7,14 @@
 
 function build_(){
   base="tuffix-installer/"
-  # copy all essenital files 
-  cp -ar shell_scripts/hello  "$base"/usr/local/bin
   revision="$(awk '/Version:/ {print $2}' "$base"/DEBIAN/control | cut -d "-" -f1)"
   current_version="$(awk '/Version:/ {print $2}' "$base"/DEBIAN/control | cut -d "-" -f2)"
   new_version=$((current_version+1))
-  package_name="com.csuf.tuffix_$revision-$new_version"
+  arch="$(dpkg-architecture -qDEB_BUILD_ARCH)"
+  package_name="tuffix_"$revision-$new_version"_$arch"
   sed -i "s/Version: .*/Version: $revision-$new_version/" "$base"/DEBIAN/control
-  echo "$package_name".deb
-  dpkg-deb --build "$base"
-  dpkg -i tuffix_installer.deb
-  dpkg --list | grep -i "tuffix"
+  echo "[+] Building $package_name.deb"
+  dpkg-buildpackage -us -uc -b --changes-option=-u./dist > "$package_name".deb
 }
 
 function err_(){
