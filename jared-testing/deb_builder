@@ -14,7 +14,7 @@ function build_(){
   package_name="tuffix_"$revision-$new_version"_$arch"
   sed -i "s/Version: .*/Version: $revision-$new_version/" "$base"/DEBIAN/control
   echo "[+] Building $package_name.deb"
-  dpkg-buildpackage -us -uc -b --changes-option=-u./dist > "$package_name".deb
+  dpkg-deb --build "$base" "$package_name".deb
 }
 
 function err_(){
@@ -24,3 +24,7 @@ function err_(){
 
 #[[ "$(uname -a | grep -i "ubuntu")" ]] && build_ || err_
 build_
+
+
+# we are also setting the compat flag to 19 since we want to coerce the students to be using a major release greater than 19
+# please refer to ../tuffixize.sh:40
