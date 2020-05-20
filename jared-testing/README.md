@@ -7,10 +7,14 @@ Instead of documenting all the ideas I want to implement directly into the scrip
 - The only foreseeable future is that `/opt/csufcs/bin` is not in the `$PATH`, so we would need to add that in the post install script
   - Users would need a default shell, and I elect bash because it is the default in Ubuntu. (This will edit `~/.bashrc`)
 - Permissions for the binaries/scripts should be 755, if we want we can change that
-
+- Makefile now should support the creation of Debian packages, the only issue is that the Make recipe needs to depend on the contents of the `tuffix` installer.
+  - The current implementation just brings a list of all files in the installer directory and ignoring the DEBIAN directory
+  - Make does not seem to respect it and is continues to run the recipe after 
 # Dependencies
 
-- `dpkg-dev`:  getting the current build architecture
+~~- `dpkg-dev`:  getting the current build architecture~~
+
+**no longer needed, just use uname**
 
 
 # External Links

@@ -1,0 +1,13 @@
+language: cpp
+compiler: clang
+os: linux
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libstdc++-4.8-dev
+install: true
+script:
+  - clang++ -std=c++17 Main.cpp GroceryCheckout.cpp -o Main
+  - ./Main

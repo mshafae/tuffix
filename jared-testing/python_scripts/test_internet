@@ -1,0 +1,13 @@
+#!/usr/bin/env python3.8
+
+import urllib.request as r
+import os
+
+try:
+  print("[+] Testing internet connection.....")
+  url = "https://www.cs.princeton.edu/courses/archive/spring01/cs333/ed.c"
+  file_path = os.path.basename(url)
+
+  r.urlretrieve(url, "/tmp/{}".format(file_path))
+except Exception as error:
+  print("[-] Exception received {}".format(error))
