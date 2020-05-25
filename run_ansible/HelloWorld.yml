@@ -1,0 +1,8 @@
+---
+- name: This is a hello world example
+  hosts: ansibleclient01.client
+  tasks:
+    - name: Create a file in '/tmp/testfile.txt'
+      copy:
+        content: "Hello World"
+        dest: /tmp/testfile.txt

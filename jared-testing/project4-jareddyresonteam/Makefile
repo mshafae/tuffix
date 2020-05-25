@@ -13,6 +13,7 @@ default all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CXX) $(CFLAGS) -o $(TARGET) $(OBJS)
 
+.PHONY: clean
 clean:
 	rm *.o
 scrubbed: clean

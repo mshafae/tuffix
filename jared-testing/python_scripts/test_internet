@@ -1,13 +1,11 @@
 #!/usr/bin/env python3.8
 
-import urllib.request as r
-import os
+# https://www.codespeedy.com/how-to-check-the-internet-connection-in-python/
+# Found this code here and condensed it
 
-try:
-  print("[+] Testing internet connection.....")
-  url = "https://www.cs.princeton.edu/courses/archive/spring01/cs333/ed.c"
-  file_path = os.path.basename(url)
+import socket
 
-  r.urlretrieve(url, "/tmp/{}".format(file_path))
-except Exception as error:
-  print("[-] Exception received {}".format(error))
+def check():
+    return (socket.gethostbyname(socket.gethostname()) != "127.0.0.1")
+
+print("Connected!" if check() else "Not connected!")
