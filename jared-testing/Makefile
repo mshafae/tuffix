@@ -9,10 +9,10 @@ objects = hello.o goodbye.o main.o
 
 TARGET = main
 
-all: $(objects) update_information
+all: $(TARGET) $(objects) 
 	$(CC) -o $(TARGET) $(objects)
-	$(eval PKG_REVISION := $$(shell awk '/Version:/ {print $$2}' $(PKG_BASE)/DEBIAN/control | cut -d "-" -f1))
-	$(eval PKG_VERSION := $$(shell awk '/Version:/ {print $$2}' $(PKG_BASE)/DEBIAN/control | cut -d "-" -f2))
+	$(eval PKG_REVISION := $$(shell sed -n -e 's/^.*Version: //p' $(PKG_BASE)/DEBIAN/control| sed "s/^[ \t]*//" | cut -d "-" -f1))
+	$(eval PKG_VERSION := $$(shell sed -n -e 's/^.*Version: //p' $(PKG_BASE)/DEBIAN/control| sed "s/^[ \t]*//" | cut -d "-" -f2))
 	$(eval PKG_UPDATED=$(shell echo $$(($(PKG_VERSION)+1))))
 	find $(PKG_BASE) -type f -not -path "*DEBIAN*" -exec chmod 755 {} \;
 	sed -i "s/Version: .*/Version: $(PKG_REVISION)-$(PKG_UPDATED)/" $(PKG_BASE)/DEBIAN/control
