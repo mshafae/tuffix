@@ -6,30 +6,11 @@ AUTHOR: Jared Dyreson
 INSTITUTION: California State University Fullerton
 """
 
-# this regex really only supports the intel platform, need an AMD output to test regex
-# intel_model_name = r'model name.*\:.*(?P<manufacturer>Intel|AMD).*(?P<model>i[3|5|7|9]\-[0-9]{4}).*(?P<output>[0-9].*[0-9]{2})'
-
 import re
 import os
 import subprocess
 import socket
 from datetime import datetime
-
-"""
-TODO:
-- cpu core count (done)
-- cpu model name (done)
-- current shell (done)
-- uptime (done)
-- current time (done)
-- kernel name (done)
-- host (done)
-- OS (done)
-- GPU
-- Mem
-
-- PIECE IT ALL TOGETHER
-"""
 
 def cpu_information():
   path = "/proc/cpuinfo"
