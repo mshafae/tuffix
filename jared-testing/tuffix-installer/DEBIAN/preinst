@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# GOAL: install pre requisites for the Tuffix installer
+# AUTHOR: Jared Dyreson
+# INSTITUTION: California State University Fullerton
+
+sudo apt-get update
+sudo apt-get install git vim wget python3-pip ansible -y
+sudo pip3 install "git+https://github.com/JaredDyreson/TuffixLang#egg=httpie"
+
+# directly from the Wiki Page
+# add Tuffix PPA to /etc/apt/sources.list.d
+# add Tuffix PPA gpg key
