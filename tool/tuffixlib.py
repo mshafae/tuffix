@@ -1112,7 +1112,7 @@ class ZoomKeyword(AbstractKeyword):
     def add(self):
         add_deb_packages(self.packages[:3])
         url = "https://zoom.us/client/latest/zoom_amd64.deb"
-        file_path = pathlib.Path("/tmp/zoom.deb")
+        file_path = "/tmp/zoom"
         with open(file_path, 'wb') as fp:
             fp.write(requests.get(url).content)
         apt.debfile.DebPackage(filename=file_path).install()
