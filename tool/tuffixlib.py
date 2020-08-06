@@ -1099,7 +1099,10 @@ class VirtualBoxKeyword(AbstractKeyword):
         remove_deb_packages(self.packages)
 
 class ZoomKeyword(AbstractKeyword):
-    packages = ['zoom']
+    packages = ['libgl1-mesa-glx',
+                'libegl1-mesa',
+                'libxcb-xtest0',
+                'zoom']
 
     def __init__(self, build_config):
         super().__init__(build_config,
@@ -1107,6 +1110,7 @@ class ZoomKeyword(AbstractKeyword):
                          'Video conferencing software')
          
     def add(self):
+        add_deb_packages(self.packages[:3])
         url = "https://zoom.us/client/latest/zoom_amd64.deb"
         file_path = pathlib.Path("/tmp/zoom.deb")
         with open(file_path, 'wb') as fp:
