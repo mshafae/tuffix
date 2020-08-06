@@ -795,7 +795,18 @@ class ChromeKeyword(AbstractKeyword):
     def remove(self):
         remove_deb_packages(self.packages)
 
+class C121Keyword(AbstractKeyword):
 
+    packages = ['cimg-dev']
+
+    def __init__(self, build_config):
+        super().__init__(build_config, 'C121', 'CPSC 121 (Object-Oriented Programming)')
+ 
+    def add(self):
+        add_deb_packages(self.packages)
+
+    def remove(self):
+        remove_deb_packages(self.packages)
 
 class C223JKeyword(AbstractKeyword):
 
@@ -1087,6 +1098,25 @@ class VirtualBoxKeyword(AbstractKeyword):
     def remove(self):
         remove_deb_packages(self.packages)
 
+class ZoomKeyword(AbstractKeyword):
+    packages = ['zoom']
+
+    def __init__(self, build_config):
+        super().__init__(build_config,
+                         'zoom',
+                         'Video conferencing software')
+         
+    def add(self):
+        url = "https://zoom.us/client/latest/zoom_amd64.deb"
+        file_path = pathlib.Path("/tmp/zoom.deb")
+        with open(file_path, 'wb') as fp:
+            fp.write(requests.get(url).content)
+        apt.debfile.DebPackage(filename=file_path).install()
+        
+    def remove(self):
+        remove_deb_packages(self.packages)
+
+
 # TODO: more keywords...
 
 def all_keywords(build_config):
@@ -1098,6 +1128,7 @@ def all_keywords(build_config):
              # ChromeKeyword(build_config),
              # GeneralKeyword(build_config),
              LatexKeyword(build_config),
+             ZoomKeyword(build_config),
              # MediaKeyword(build_config),
              # VirtualBoxKeyword(build_config),
              # C223JKeyword(build_config),
@@ -1105,6 +1136,7 @@ def all_keywords(build_config):
              # C223PKeyword(build_config),
              # C223WKeyword(build_config),
              # C240Keyword(build_config),
+             C121Keyword(build_config),
              C439Keyword(build_config),
              C474Keyword(build_config),
              # C481Keyword(build_config), 
