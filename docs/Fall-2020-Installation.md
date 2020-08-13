@@ -16,8 +16,8 @@ Please consult ![this](https://github.com/mshafae/tuffix/wiki/Tuffix-2.0-require
     - **This might take a while to download as it is a large file.**
 - After it is finished downloading, proceed to starting VirtualBox via your application launcher.
 - Go to the tool bar seen here:
-    * [Toolbar](assets/2020-install/toolbar.png)
+    * ![Toolbar](assets/2020-install/toolbar.png)
 - Then click the "File" section and you will be greeted with this drop down and click the indicated selection:
-    * [Dropdown](assets/2020-install/dropdown.png)
+    * ![Dropdown](assets/2020-install/dropdown.png)
 - This window will appear and proceed to click the element outlined in black:
-    * [File Selection](assets/2020-install/file-selection.png)
+    * ![File Selection](assets/2020-install/file-selection.png)
