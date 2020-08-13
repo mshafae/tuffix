@@ -21,3 +21,20 @@ Please consult ![this](https://github.com/mshafae/tuffix/wiki/Tuffix-2.0-require
     * ![Dropdown](assets/2020-install/dropdown.png)
 - This window will appear and proceed to click the element outlined in black:
     * ![File Selection](assets/2020-install/file-selection.png)
+- Go to where the file has been downloaded. It generally resides in either your downloads folder or is saved to `/tmp` if you're running a Linux system. Be sure to check in your browser of choice.
+    * ![Downloads Folder](assets/2020-install/downloaded.png)
+- After it has been selected, press "Next":
+    * ![Import](assets/2020-install/import.png)
+- Then proceed to import:
+    * ![Finally](assets/2020-install/finally.png)
+- This step will take sometime depending on your set up:
+    * ![Importing Phase](assets/2020-install/importing-phase.png)
+- Once it has finished importing, you will see a pane like this:
+    * ![Tuffix Pane](assets/2020-install/tuffix.png)
+- Right click and press "Start ->":
+    * ![Spin up](assets/2020-install/spin-up.png)
+- Once fully booted up, you should see this prompt:
+    * The default password is "student", all lower case
+    * ![Login](assets/2020-install/tuffix-landing.png)
+- You're all set to go from here:
+    * ![Running](assets/2020-install/tuffix-running.png)
