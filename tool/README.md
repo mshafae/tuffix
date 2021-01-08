@@ -56,3 +56,12 @@
 - `sudo_execute` has been renamed to `sudo_run`
 - Google Test unit test has been migrated [to another repository](https://github.com/JaredDyreson/tuffix-google-test) to remove the pedantic errors.
 - `ssh-add` was put into RekeyCommand's `ssh_gen` function 
+
+
+# Changelog (01/08/2020 at 14:40)
+
+- Converting all string format calls to f-strings, as it is easier to read and mantain
+- Splitting up the library into separate files
+- Creating a proper `setup.py` that encompasses all external imports
+- Removing bloat (if present)
+    * TODO

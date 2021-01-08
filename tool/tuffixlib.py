@@ -1338,14 +1338,16 @@ def cpu_information() -> str:
         elif(model_match and name is None):
             name = model_match.group("name")
         elif(cores and name):
-            return "{} ({} cores)".format(' '.join(name.split()), cores)
+            # return "{} ({} cores)".format(' '.join(name.split()), cores)
+            return f"{' '.join(name.split())} ({cores} cores)"
 
 def host() -> str:
     """
     Goal: get the current user logged in and the computer they are logged into
     """
 
-    return "{}@{}".format(os.getlogin(), socket.gethostname())
+    # return "{}@{}".format(os.getlogin(), socket.gethostname())
+    return f"{os.getlogin()}@{socket.gethostname()}"
 
 def current_operating_system() -> str:
     """
@@ -1384,7 +1386,11 @@ def current_model() -> str:
         family = fp.readline().strip('\n')
     with open(vendor_name, "r") as fp:
         vendor = fp.read().split()[0].strip('\n')
-    return "{} {}{}".format("" if vendor in name else vendor, name, "" if name not in family else family)
+
+    vendor = "" if vendor in name else vendor
+    family = "" if name not in family else family
+    # return "{} {}{}".format("" if vendor in name else vendor, name, "" if name not in family else family)
+    return f"{vendor} {name}{family}"
 
 def current_uptime() -> str:
     """
@@ -1405,19 +1411,21 @@ def current_uptime() -> str:
     minutes = int( ( total_seconds % HOUR ) / MINUTE )
     seconds = int( total_seconds % MINUTE )
 
-    return "{} {}, {} {}, {} {}, {} {}".format(
-      days, "days" if (days > 1) else "day",
-      hours, "hours" if (hours > 1) else "hour",
-      minutes, "minutes" if (minutes > 1) else "minute",
-      seconds, "seconds" if (seconds > 1) else "second"
-    )
+    # return "{} {}, {} {}, {} {}, {} {}".format(
+      # days, "days" if (days > 1) else "day",
+      # hours, "hours" if (hours > 1) else "hour",
+      # minutes, "minutes" if (minutes > 1) else "minute",
+      # seconds, "seconds" if (seconds > 1) else "second"
+    # )
+
+    return f"{days} day(s), {hours} hour(s), {minutes} minute(s), {seconds} second(s)"
 
 def memory_information() -> int:
     """
     Goal: get total amount of ram on system
     """
-    
-    formatting = lambda quantity, power: quantity/(1000**power) 
+
+    formatting = lambda quantity, power: quantity/(1000**power)
     path = "/proc/meminfo"
     with open(path, "r") as fp:
         total = int(fp.readline().split()[1])
@@ -1427,7 +1435,7 @@ def graphics_information() -> str:
     """
     Use lspci to get the current graphics card in use
     Requires pciutils to be installed (seems to be installed by default on Ubuntu)
-    Source: https://stackoverflow.com/questions/13867696/python-in-linux-obtain-vga-specifications-via-lspci-or-hal 
+    Source: https://stackoverflow.com/questions/13867696/python-in-linux-obtain-vga-specifications-via-lspci-or-hal
     """
 
     primary, secondary = None, None
@@ -1511,46 +1519,69 @@ def status() -> str:
     primary, secondary = graphics_information()
     installed_targets = currently_installed_targets()
 
-    return """
-{}
+    # return """
+# {}
+# -----
+
+# OS: {}
+# Model: {}
+# Kernel: {}
+# Uptime: {}
+# Shell: {}
+# Terminal: {}
+# CPU: {}
+# GPU:
+  # - Primary: {}
+  # - Secondary: {}
+# Memory: {} GB
+# Current Time: {}
+# Git Configuration:
+  # - Email: {}
+  # - Username: {}
+# Installed keywords:
+  # {}
+# Connected to Internet: {}
+# """.format(
+    # host(),
+    # current_operating_system(),
+    # current_model(),
+    # current_kernel_revision(),
+    # current_uptime(),
+    # system_shell(),
+    # system_terminal_emulator(),
+    # cpu_information(),
+    # primary,
+    # secondary,
+    # memory_information(),
+    # current_time(),
+    # git_email,
+    # git_username,
+    # '\n'.join(installed_targets).strip() if (len(installed_targets) !=  0) else "None",
+    # "Yes" if has_internet() else "No"
+ # )
+    return f"""
+{host}
 -----
 
-OS: {}
-Model: {}
-Kernel: {}
-Uptime: {}
-Shell: {}
-Terminal: {}
-CPU: {}
+OS: {current_operating_system()}
+Model: {current_model()}
+Kernel: {current_kernel_revision()}
+Uptime: {current_uptime()}
+Shell: {system_shell()}
+Terminal: {system_terminal_emulator()}
+CPU: {cpu_information()}
 GPU:
-  - Primary: {}
-  - Secondary: {}
-Memory: {} GB
+  - Primary: {primary}
+  - Secondary: {secondary}
+Memory: {memory_information()} GB
 Current Time: {}
 Git Configuration:
-  - Email: {}
-  - Username: {}
+  - Email: {git_email}
+  - Username: {git_username}
 Installed keywords:
-  {}
-Connected to Internet: {}
-""".format(
-    host(),
-    current_operating_system(),
-    current_model(),
-    current_kernel_revision(),
-    current_uptime(),
-    system_shell(),
-    system_terminal_emulator(),
-    cpu_information(),
-    primary,
-    secondary,
-    memory_information(),
-    current_time(),
-    git_email,
-    git_username,
-    '\n'.join(installed_targets).strip() if (len(installed_targets) !=  0) else "None",
-    "Yes" if has_internet() else "No"
- )
+  {'\n'.join(installed_targets).strip() if (len(installed_targets) !=  0) else "None"}
+Connected to Internet: {"Yes" if has_internet() else "No"}
+"""
 
 def system_shell():
     """
@@ -1559,7 +1590,8 @@ def system_shell():
 
     path = "/etc/passwd"
     cu = os.getlogin()
-    _r_shell = re.compile("^{}.*\:\/home\/{}\:(?P<path>.*)".format(cu, cu))
+    # _r_shell = re.compile("^{}.*\:\/home\/{}\:(?P<path>.*)".format(cu, cu))
+    _r_shell = re.compile(f"^{cu}.*\:\/home\/{cu}\:(?P<path>.*)")
     shell_name = None
     with open(path, "r") as fp:
         contents = fp.readlines()
