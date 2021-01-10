@@ -1,30 +1,8 @@
-# this is just a hello-world-grade setup.py, needs work!
-import setuptools
-setuptools.setup(
-    name='tuffix',
-    version='0.0.0',
-    packages=setuptools.find_packages(),
-
-    install_requires=['packaging', 
-                      'pyfakefs', 
-                      'python-apt', 
-                      'requests', 
-                      'termcolor', 
-                      'Crypto',
-                      'pycryptodome',
-                      'python-gnupg']
-                      # 'sudo_execute @ git+https://github.com/JaredDyreson/sudo_execute']
-)
-
-"""
-A more robust setup.py, from the TuffixLang repo:
-
-
 from setuptools import setup
 import os
 import sys
 
-PKG_NAME = "TuffixLang"
+PKG_NAME = "Tuffix"
 
 _here = os.path.abspath(os.path.dirname(__file__))
 
@@ -44,22 +22,21 @@ setup(
     version=version['__version__'],
     description=('An basic interpreter for the Tuffix Project'),
     long_description=long_description,
-    author='Jared Dyreson',
+    author='Kevin Wortman, Michael Shafae, Jared Dyreson',
     author_email='jareddyreson@csu.fullerton.edu',
-    url='https://github.com/JaredDyreson/cactus',
+    url='https://github.com/mshafae/tuffix',
     license='GNU GPL-3.0',
     packages=[PKG_NAME],
     install_requires = [
-      'beautifulsoup4',
-      'colored',
-      'lxml',
-      'natsort',
+      'Crypto',
+      'packaging',
+      'pycryptodome',
+      'pyfakefs',
+      # 'python-apt',
+      'python-gnupg',
       'requests',
-      'rply',
       'termcolor'
     ],
     include_package_data=True,
     classifiers=['Programming Language :: Python :: 3.8']
 )
-
-"""
