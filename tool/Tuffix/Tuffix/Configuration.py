@@ -19,6 +19,7 @@ from Tuffix.Constants import *
 
 import packaging.version
 import pathlib
+import json
 
 # Configuration defined at build-time. This is a class so that we can
 # unit test with dependency injection.

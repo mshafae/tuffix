@@ -4,8 +4,11 @@ Tuffix/Commands.py
 Tuffix/Configuration.py
 Tuffix/Constants.py
 Tuffix/Exceptions.py
+Tuffix/KeywordHelperFunctions.py
+Tuffix/Keywords.py
+Tuffix/Status.py
 Tuffix/SudoRun.py
-Tuffix/__init__.py
+Tuffix/UtilityFunctions.py
 Tuffix/version.py
 Tuffix.egg-info/PKG-INFO
 Tuffix.egg-info/SOURCES.txt

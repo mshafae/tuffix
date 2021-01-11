@@ -1,58 +1,10 @@
-
-################################################################################
-# imports
-################################################################################
-
-# standard library
-
-from datetime import datetime
-import io
-import json
-import os
-import pathlib
-import re
-import shutil
-import socket
-import subprocess
-import sys
-import unittest
-
-# packages
-
-try:
-    import apt.cache
-    import apt.debfile
-    import packaging.version
-except ImportError:
-    print("[+] Running in development environment (most likely Arch), doing dummy imports for this to work")
-
-from termcolor import colored
-import requests
-from Crypto.PublicKey import RSA
-import gnupg
-import getpass
-
-# our new imports
-# README:
-# these are the things I have compartmentalized, please do testing to ensure all moving parts work
-
-from Tuffix.Commands import *
-from Tuffix.Configuration import *
-from Tuffix.Constants import VERSION, STATE_PATH, KEYWORD_MAX_LENGTH
-from Tuffix.Exceptions import *
-from Tuffix.SudoRun import SudoRun
-
-print('things work from here')
-
-quit()
-
-
-# TODO: all the other commands...
-
-
 ################################################################################
 # keywords
 ################################################################################
+
+from Tuffix.Configuration import *
+from Tuffix.SudoRun import SudoRun
+from Tuffix.KeywordHelperFunctions import *
 
 class AbstractKeyword:
     def __init__(self, build_config, name, description):
@@ -66,7 +18,7 @@ class AbstractKeyword:
 
     def add(self):
         raise NotImplementedError
-        
+
     def remove(self):
         raise NotImplementedError
 
@@ -79,7 +31,7 @@ class AllKeyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'all', 'all keywords available (glob pattern); to be used in conjunction with remove or add respectively')
- 
+
     def add(self):
         add_deb_packages(self.packages)
 
@@ -119,7 +71,7 @@ class GeneralKeyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'general', 'General configuration, not tied to any specific course')
- 
+
     def add(self):
         add_deb_packages(self.packages)
 
@@ -150,26 +102,26 @@ class BaseKeyword(AbstractKeyword):
               'lldb',
               'python2']
 
-  
+
     def __init__(self, build_config):
         super().__init__(build_config,
                        'base',
                        'CPSC 120-121-131-301 C++ development environment')
-      
+
     def add(self):
         self.add_vscode_repository()
         add_deb_packages(self.packages)
         self.atom()
         self.google_test_attempt()
         self.configure_git()
-      
+
     def remove(self):
         remove_deb_packages(self.packages)
 
     def add_vscode_repository(self):
         print("[INFO] Adding Microsoft repository...")
         sudo_install_command = "sudo install -o root -g root -m 644 /tmp/packages.microsoft.gpg /etc/apt/trusted.gpg.d/"
-        
+
         url = "https://packages.microsoft.com/keys/microsoft.asc"
 
         asc_path = pathlib.Path("/tmp/m.asc")
@@ -190,7 +142,7 @@ class BaseKeyword(AbstractKeyword):
     def configure_git(self):
         """
         GOAL: Configure git
-        """ 
+        """
 
         keeper = SudoRun()
         whoami = keeper.whoami
@@ -641,9 +593,6 @@ class ZoomKeyword(AbstractKeyword):
     def remove(self):
         remove_deb_packages(self.packages)
 
-
-# TODO: more keywords...
-
 def all_keywords(build_config):
     if not isinstance(build_config, BuildConfig):
         raise ValueError
@@ -676,157 +625,3 @@ def find_keyword(build_config, name):
         if keyword.name == name:
             return keyword
     raise UsageError('unknown keyword "' + name + '", see valid keyword names with $ tuffix list')
-
-################################################################################
-# system probing functions (gathering info about the environment)
-################################################################################
-
-# Return the Debian-style release codename, e.g. 'focal'.
-# Raises EnvironmentError if this cannot be determined (most likely this is not
-# a Debian-based OS).
-def distrib_codename():
-    try:
-        with open('/etc/lsb-release') as stream:
-            return parse_distrib_codename(stream)
-    except OSError:
-        raise EnvironmentError('no /etc/lsb-release; this does not seem to be Linux')
-
-# Raises EnvironmentError if there is no connected network adapter.
-def ensure_network_connected():
-    """
-    NOTE: has been duplicated in has_internet
-    Please discard when necessary
-    """
-
-    PARENT_DIR = '/sys/class/net'
-    LOOPBACK_ADAPTER = 'lo'
-    if not os.path.isdir(PARENT_DIR):
-        raise EnvironmentError('no ' + PARENT_DIR + '; this does not seem to be Linux')
-    adapter_path = None
-    for entry in os.listdir(PARENT_DIR):
-        subdir_path = os.path.join(PARENT_DIR, entry)
-        if (entry.startswith('.') or
-            entry == LOOPBACK_ADAPTER or
-            not os.path.isdir(subdir_path)):
-            continue
-        carrier_path = os.path.join(subdir_path, 'carrier')
-        try:
-            with open(carrier_path) as f:
-                state = int(f.read())
-                if state != 0:
-                    return # found one, stop
-        except OSError: # file not found
-            pass
-        except ValueError: # int(...) parse error
-            pass
-    raise EnvironmentError('no connected network adapter, internet is down')
-
-# Raises UsageError if we do not have root access.
-def ensure_root_access():
-    if os.getuid() != 0:
-        raise UsageError('you do not have root access; run this command like $ sudo tuffix ...')
-
-# Raise EnvironemntError if the given shell command name is not an executable
-# program.
-# name: a string containing a shell program name, e.g. 'ping'.
-def ensure_shell_command_exists(name):
-    if not (isinstance(name, str)):
-        raise ValueError
-    try:
-        result = subprocess.run(['which', name])
-        if result.returncode != 0:
-            raise EnvironmentError('command "' + name + '" not found; this does not seem to be Ubuntu')
-    except FileNotFoundError:
-        raise EnvironmentError("no 'which' command; this does not seem to be Linux")
-
-################################################################################
-# changing the system during keyword add/remove
-################################################################################
-
-def add_deb_packages(package_names):
-    if not (isinstance(package_names, list) and
-            all(isinstance(name, str) for name in package_names)):
-        raise ValueError
-    print(f'[INFO] Adding all packages to the APT queue ({len(package_names)})')
-    cache = apt.cache.Cache()
-    cache.update()
-    cache.open()
-    for name in package_names:
-        print(f'adding {name}')
-        try:
-            cache[name].mark_install()
-        except KeyError:
-            raise EnvironmentError('deb package "' + name + '" not found, is this Ubuntu?')
-    try:
-        cache.commit()
-    except Exception as e:
-        raise EnvironmentError('error installing package "' + name + '": ' + str(e))
-
-# create the directory for the state file, unless it already exists
-def create_state_directory(build_config):
-    ensure_root_access()
-    dir_path = os.path.dirname(build_config.state_path)
-    os.makedirs(dir_path, exist_ok=True)
-
-def remove_deb_packages(package_names):
-    if not (isinstance(package_names, list) and
-            all(isinstance(name, str) for name in package_names)):
-        raise ValueError
-    cache = apt.cache.Cache()
-    cache.update()
-    cache.open()
-    for name in package_names:
-        try:
-            cache[name].mark_delete()
-        except KeyError:
-            raise EnvironmentError('deb package "' + name + '" not found, is this Ubuntu?')
-    try:
-        cache.commit()
-    except Exception as e:
-        raise EnvironmentError('error removing package "' + name + '": ' + str(e))
-
-################################################################################
-# miscellaneous utility functions
-################################################################################
-
-# Read and parse the release codename from /etc/lsb-release .
-def distrib_codename():
-    with open('/etc/lsb-release') as f:
-        return parse_distrib_codename(f)
-
-def is_deb_package_installed(package_name):
-    try:
-        apt_pkg.init()
-        cache = apt_pkg.Cache()
-        package = cache[package_name]
-        return (package.current_state == apt_pkg.CURSTATE_INSTALLED)
-    except KeyError:
-        raise EnvironmentError('no such package "' + package_name + '"; is this Ubuntu?')
-    
-# Parse the DISTRIB_CODENAME from a file formatted like /etc/lsb-release .
-# This is factored out into its own function for unit testing.
-# stream: a readable stream to /etc/lsb-release, or a similar file.
-def parse_distrib_codename(stream):
-    # find a line with DISTRIB_CODENAME=...
-    line = None
-    for l in stream.readlines():
-        if l.startswith('DISTRIB_CODENAME'):
-            line = l
-            break
-    if not line:
-        raise EnvironmentError('/etc/lsb-release has no DISTRIB_CODENAME')
-    # return the word after =, with whitespace removed
-    tokens = line.split('=')
-    if len(tokens) != 2:
-        raise EnvironmentError('/etc/lsb-release syntax error')
-    codename = tokens[1].strip()
-    return codename
-
-
-
-################################################################################
-# main, argument parsing, and usage errors
-################################################################################
-
-
-

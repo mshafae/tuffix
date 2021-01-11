@@ -10,12 +10,13 @@ import sys
 
 # import tuffixlib # NOTE : being depreciated
 
+from Tuffix.Commands import all_commands
 from Tuffix.Configuration import BuildConfig, DEFAULT_BUILD_CONFIG
 from Tuffix.Exceptions import *
-from Tuffix.Commands import all_commands
 from Tuffix.Status import *
 
-# DRIVER CODE (ADAPTED FROM KEVIN WORTMAN)
+# Commands.py  Configuration.py  Constants.py  Exceptions.py  KeywordHelperFunctions.py  Keywords.py  __pycache__  Status.py  SudoRun.py   UtilityFunctions.py  version.py
+
 
 def print_usage(build_config):
     if not (isinstance(build_config, BuildConfig)):
@@ -38,13 +39,14 @@ def print_usage(build_config):
 
     print('')
 
-
-# Run the whole tuffix program. This is a self-contained function for unit
-# testing purposes.
-# build_config: a BuildConfig object
-# argv: a list of commandline argument strings, such as sys.argv
-
 def main(build_config, argv):
+    """
+    Run the whole tuffix program. This is a self-contained function for unit
+    testing purposes.
+    build_config: a BuildConfig object
+    argv: a list of commandline argument strings, such as sys.argv
+
+    """
     if not (isinstance(build_config, BuildConfig) and
             isinstance(argv, list) and
             all([isinstance(arg, str) for arg in argv])):
@@ -86,7 +88,5 @@ def main(build_config, argv):
 
 
 
-for line in status():
-    print(line)
-# if __name__ == '__main__':
-    # # main(DEFAULT_BUILD_CONFIG, sys.argv)
+if __name__ == '__main__':
+    main(DEFAULT_BUILD_CONFIG, sys.argv)

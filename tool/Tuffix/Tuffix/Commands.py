@@ -4,7 +4,9 @@
 ################################################################################
 
 from Tuffix.Exceptions import *
-from Tuffix.Configuration import BuildConfig
+from Tuffix.Configuration import BuildConfig, State
+from Tuffix.Constants import *
+from Tuffix.UtilityFunctions import *
 import os
 
 # abstract base class for one of the user-visible tuffix commands, e.g.
@@ -242,7 +244,7 @@ class InitCommand(AbstractCommand):
         state = State(self.build_config, self.build_config.version, [])
         state.write()
 
-        print('tuffix init succeeded')
+        print('[INFO] Tuffix init succeeded')
 
 class InstalledCommand(AbstractCommand):
     def __init__(self, build_config):
