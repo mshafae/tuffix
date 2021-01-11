@@ -33,10 +33,10 @@ class AllKeyword(AbstractKeyword):
         super().__init__(build_config, 'all', 'all keywords available (glob pattern); to be used in conjunction with remove or add respectively')
 
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class GeneralKeyword(AbstractKeyword):
 
@@ -73,10 +73,10 @@ class GeneralKeyword(AbstractKeyword):
         super().__init__(build_config, 'general', 'General configuration, not tied to any specific course')
 
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class BaseKeyword(AbstractKeyword):
 
@@ -110,13 +110,13 @@ class BaseKeyword(AbstractKeyword):
 
     def add(self):
         self.add_vscode_repository()
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
         self.atom()
         self.google_test_attempt()
         self.configure_git()
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
     def add_vscode_repository(self):
         print("[INFO] Adding Microsoft repository...")
@@ -266,7 +266,7 @@ class ChromeKeyword(AbstractKeyword):
         subprocess.check_output(f'sudo apt-key add {google_sources_path}'.split())
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class C121Keyword(AbstractKeyword):
 
@@ -276,11 +276,11 @@ class C121Keyword(AbstractKeyword):
         super().__init__(build_config, 'C121', 'CPSC 121 (Object-Oriented Programming)')
  
     def add(self):
-        # add_deb_packages(self.packages)
+        # edit_deb_packages(self.packages, True)
         edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class C223JKeyword(AbstractKeyword):
 
@@ -301,10 +301,10 @@ class C223JKeyword(AbstractKeyword):
         super().__init__(build_config, 'C223J', 'CPSC 223J (Java Programming)')
  
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class C223NKeyword(AbstractKeyword):
     """
@@ -318,10 +318,10 @@ class C223NKeyword(AbstractKeyword):
         super().__init__(build_config, 'C223N', 'CPSC 223N (C# Programming)')
  
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class C223PKeyword(AbstractKeyword):
     """
@@ -345,10 +345,10 @@ class C223PKeyword(AbstractKeyword):
         super().__init__(build_config, 'C223P', 'CPSC 223P (Python Programming)')
  
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class C223WKeyword(AbstractKeyword):
     
@@ -376,10 +376,10 @@ class C223WKeyword(AbstractKeyword):
         super().__init__(build_config, 'C223W', 'CPSC 223W (Swift Programming)')
  
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 
 class C240Keyword(AbstractKeyword):
@@ -395,10 +395,10 @@ class C240Keyword(AbstractKeyword):
         super().__init__(build_config, 'C240', 'CPSC 240 (Assembler)')
  
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class C439Keyword(AbstractKeyword):
 
@@ -412,10 +412,10 @@ class C439Keyword(AbstractKeyword):
         super().__init__(build_config, 'C439', 'CPSC 439 (Theory of Computation)')
 
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class C474Keyword(AbstractKeyword):
 
@@ -433,10 +433,10 @@ class C474Keyword(AbstractKeyword):
         super().__init__(build_config, 'C474', 'CPSC 474 (Parallel and Distributed Computing)')
          
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
         
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class C481Keyword(AbstractKeyword):
 
@@ -456,7 +456,7 @@ class C481Keyword(AbstractKeyword):
         super().__init__(build_config, 'C481', 'CPSC 481 (Artificial Intelligence)')
  
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
         """
         You are going to need to get the most up to date
         link because the original one broke and this one currently works.
@@ -482,7 +482,7 @@ class C481Keyword(AbstractKeyword):
         """
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class C484Keyword(AbstractKeyword):
 
@@ -509,10 +509,10 @@ class C484Keyword(AbstractKeyword):
         super().__init__(build_config, 'C484', 'CPSC 484 (Principles of Computer Graphics)')
  
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class MediaKeyword(AbstractKeyword):
 
@@ -527,10 +527,10 @@ class MediaKeyword(AbstractKeyword):
         super().__init__(build_config, 'media', 'Media Computation Tools')
  
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class LatexKeyword(AbstractKeyword):
     packages = ['texlive-full']
@@ -541,10 +541,10 @@ class LatexKeyword(AbstractKeyword):
                          'LaTeX typesetting environment (large)')
          
     def add(self):
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
         
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class VirtualBoxKeyword(AbstractKeyword):
     packages = ['virtualbox-6.1']
@@ -567,10 +567,10 @@ class VirtualBoxKeyword(AbstractKeyword):
                                         stdout=subprocess.PIPE)
         apt_key = subprocess.check_output(('sudo', 'apt-key', 'add', '-'), stdin=wget_request.stdout)
 
-        add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
         
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class ZoomKeyword(AbstractKeyword):
     packages = ['libgl1-mesa-glx',
@@ -592,7 +592,7 @@ class ZoomKeyword(AbstractKeyword):
         apt.debfile.DebPackage(filename=file_path).install()
         
     def remove(self):
-        remove_deb_packages(self.packages)
+        edit_deb_packages(self.packages, False)
 
 class TestKeyword(AbstractKeyword):
     packages = ['cowsay']
@@ -603,7 +603,7 @@ class TestKeyword(AbstractKeyword):
                          'for testing purposes')
          
     def add(self):
-        # add_deb_packages(self.packages)
+        # edit_deb_packages(self.packages, True)
         edit_deb_packages(self.packages, True)
     def remove(self):
         edit_deb_packages(self.packages, False)
@@ -612,6 +612,7 @@ def all_keywords(build_config):
     if not isinstance(build_config, BuildConfig):
         raise ValueError
     # alphabetical order, but put digits after letters
+    # TODO: all keywords commented out have not been fully developed
     return [ AllKeyword(build_config),
              BaseKeyword(build_config),
              # ChromeKeyword(build_config),
