@@ -584,7 +584,7 @@ class ZoomKeyword(AbstractKeyword):
                          'Video conferencing software')
          
     def add(self):
-        add_deb_packages(self.packages[:3])
+        edit_deb_packages(self.packages[:3], is_installing=True)
         url = "https://zoom.us/client/latest/zoom_amd64.deb"
         file_path = "/tmp/zoom"
         with open(file_path, 'wb') as fp:
