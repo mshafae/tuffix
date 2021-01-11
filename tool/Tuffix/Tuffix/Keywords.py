@@ -276,7 +276,8 @@ class C121Keyword(AbstractKeyword):
         super().__init__(build_config, 'C121', 'CPSC 121 (Object-Oriented Programming)')
  
     def add(self):
-        add_deb_packages(self.packages)
+        # add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
 
     def remove(self):
         remove_deb_packages(self.packages)
@@ -593,6 +594,20 @@ class ZoomKeyword(AbstractKeyword):
     def remove(self):
         remove_deb_packages(self.packages)
 
+class TestKeyword(AbstractKeyword):
+    packages = ['cowsay']
+
+    def __init__(self, build_config):
+        super().__init__(build_config,
+                         'test',
+                         'for testing purposes')
+         
+    def add(self):
+        # add_deb_packages(self.packages)
+        edit_deb_packages(self.packages, True)
+    def remove(self):
+        edit_deb_packages(self.packages, False)
+
 def all_keywords(build_config):
     if not isinstance(build_config, BuildConfig):
         raise ValueError
@@ -614,7 +629,8 @@ def all_keywords(build_config):
              C439Keyword(build_config),
              C474Keyword(build_config),
              # C481Keyword(build_config), 
-             C484Keyword(build_config)
+             C484Keyword(build_config),
+             TestKeyword(build_config)
              ]
 
 def find_keyword(build_config, name):

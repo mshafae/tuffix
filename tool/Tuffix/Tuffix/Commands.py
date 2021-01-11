@@ -3,9 +3,11 @@
 # AUTHORS: Kevin Wortman, Jared Dyreson
 ################################################################################
 
-from Tuffix.Exceptions import *
 from Tuffix.Configuration import BuildConfig, State
 from Tuffix.Constants import *
+from Tuffix.Exceptions import *
+from Tuffix.Keywords import *
+from Tuffix.Status import status
 from Tuffix.UtilityFunctions import *
 import os
 
@@ -104,7 +106,7 @@ class MarkCommand(AbstractCommand):
             elif((element.name not in state.installed) and (not install)):
                 raise UsageError(f'cannot remove candidate {element.name}; not installed')
 
-            print(f'tuffix: {verb} {element.name}')
+            print(f'[INFO] Tuffix: {verb} {element.name}')
 
             try:
                  getattr(element, self.command)()
@@ -126,7 +128,7 @@ class MarkCommand(AbstractCommand):
 
             os.system("apt autoremove")
 
-            print(f'tuffix: successfully {past} {element.name}')
+            print(f'[INFO] Tuffix: successfully {past} {element.name}')
 
 class AddCommand(AbstractCommand):
     def __init__(self, build_config):
@@ -297,7 +299,8 @@ class StatusCommand(AbstractCommand):
         if len(arguments) != 0:
             raise UsageError("status command does not accept arguments")
 
-        print(status())
+        for line in status():
+            print(line)
 
 class RemoveCommand(AbstractCommand):
     def __init__(self, build_config):

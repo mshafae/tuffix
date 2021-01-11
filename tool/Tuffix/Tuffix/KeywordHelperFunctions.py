@@ -58,34 +58,25 @@ class Element:
         return f'function_ {self.name}'
 
 # TODO : TESTING 
-def edit_deb_packages(package_names, function_pointer):
+def edit_deb_packages(package_names, is_installing):
     if not (isinstance(package_names, list) and
             all(isinstance(name, str) for name in package_names) and
-            callable(function_pointer)):
+            isinstance(is_installing, bool)):
         raise ValueError
     print(f'[INFO] Adding all packages to the APT queue ({len(package_names)})')
-    cache = {
-        # TODO: fake cache
-        "Hello": Element(),
-        "World": Element()
-    }
-    # cache = apt.cache.Cache()
-    # cache.update()
-    # cache.open()
+    cache = apt.cache.Cache()
+    cache.update()
+    cache.open()
     for name in package_names:
-        print(f'[INFO] Adding {name}')
+        print(f'[INFO] {"Installing" if is_installing else "Removing"} package: {name}')
         try:
-            cache[name].function_pointer()
+            cache[name].mark_install() if(is_installing) else cache[name].mark_delete()
         except KeyError:
-            print(f'[ERROR] Deb package "{name}" not found, is this Ubuntu?')
-            # raise EnvironmentError(f'[ERROR] Deb package "{name}" not found, is this Ubuntu?')
-        except AttributeError:
-            pass
+            raise EnvironmentError(f'[ERROR] Deb package "{name}" not found, is this Ubuntu?')
     try:
         cache.commit()
     except Exception as e:
-        pass
-        # raise EnvironmentError(f'[ERROR] Could not install {name}: {e}.')
+        raise EnvironmentError(f'[ERROR] Could not install {name}: {e}.')
 
 
 # TODO: actual implementation

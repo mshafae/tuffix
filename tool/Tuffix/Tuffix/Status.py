@@ -44,7 +44,6 @@ def cpu_information() -> str:
         elif(model_match and name is None):
             name = model_match.group("name")
         elif(cores and name):
-            # return "{} ({} cores)".format(' '.join(name.split()), cores)
             return f"{' '.join(name.split())} ({cores} cores)"
 
 def host() -> str:
@@ -52,7 +51,6 @@ def host() -> str:
     Goal: get the current user logged in and the computer they are logged into
     """
 
-    # return "{}@{}".format(os.getlogin(), socket.gethostname())
     return f"{os.getlogin()}@{socket.gethostname()}"
 
 def current_operating_system() -> str:
@@ -95,7 +93,6 @@ def current_model() -> str:
 
     vendor = "" if vendor in name else vendor
     family = "" if name not in family else family
-    # return "{} {}{}".format("" if vendor in name else vendor, name, "" if name not in family else family)
     return f"{vendor} {name}{family}"
 
 def current_uptime() -> str:
@@ -116,13 +113,6 @@ def current_uptime() -> str:
     hours   = int( ( total_seconds % DAY ) / HOUR )
     minutes = int( ( total_seconds % HOUR ) / MINUTE )
     seconds = int( total_seconds % MINUTE )
-
-    # return "{} {}, {} {}, {} {}, {} {}".format(
-      # days, "days" if (days > 1) else "day",
-      # hours, "hours" if (hours > 1) else "hour",
-      # minutes, "minutes" if (minutes > 1) else "minute",
-      # seconds, "seconds" if (seconds > 1) else "second"
-    # )
 
     return f"{days} day(s), {hours} hour(s), {minutes} minute(s), {seconds} second(s)"
 
@@ -208,10 +198,7 @@ def currently_installed_targets() -> list:
     """
     GOAL: list all installed codewords in a formatted list
     """
-    try:
-        return [f'{"- ": >4} {element}' for element in read_state(DEFAULT_BUILD_CONFIG).installed]
-    except EnvironmentError:
-        return None
+    return [f'{"- ": >4} {element}' for element in read_state(DEFAULT_BUILD_CONFIG).installed]
 
 
 def status() -> str:
@@ -226,6 +213,7 @@ def status() -> str:
     list_git_configuration()
     primary, secondary = graphics_information()
     installed_targets = currently_installed_targets()
+    installed_targets = '\n'.join(installed_targets).strip() if (installed_targets) else "None"
     return (
         f'{host()}',
         '-----',
@@ -245,7 +233,7 @@ def status() -> str:
         f'  - Email: {git_email}',
         f'  - Username: {git_username}',
         'Installed keywords:',
-        # f'{'\n'.join(installed_targets).strip() if (installed_targets) else "None"}',
+        f'{installed_targets}',
         f'Connected to Internet: {"Yes" if has_internet() else "No"}'
     )
 
@@ -256,7 +244,6 @@ def system_shell():
 
     path = "/etc/passwd"
     cu = os.getlogin()
-    # _r_shell = re.compile("^{}.*\:\/home\/{}\:(?P<path>.*)".format(cu, cu))
     _r_shell = re.compile(f"^{cu}.*\:\/home\/{cu}\:(?P<path>.*)")
     shell_name = None
     with open(path, "r") as fp:
