@@ -32,7 +32,7 @@ setup(
       'packaging',
       'pycryptodome',
       'pyfakefs',
-      # 'python-apt',
+      'python-apt',
       'python-gnupg',
       'requests',
       'termcolor'

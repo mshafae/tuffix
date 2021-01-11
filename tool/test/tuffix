@@ -8,16 +8,10 @@ import sys
 
 # local modules
 
-# import tuffixlib # NOTE : being depreciated
-
-try:
-    from Tuffix.Commands import all_commands
-    from Tuffix.Configuration import BuildConfig, DEFAULT_BUILD_CONFIG
-    from Tuffix.Exceptions import *
-    from Tuffix.Status import *
-except ModuleNotFoundError:
-    print('[ERROR] Please install Tuffix Python package')
-    quit()
+from Tuffix.Commands import all_commands
+from Tuffix.Configuration import BuildConfig, DEFAULT_BUILD_CONFIG
+from Tuffix.Exceptions import *
+from Tuffix.Status import *
 
 def print_usage(build_config):
     if not (isinstance(build_config, BuildConfig)):
@@ -86,8 +80,6 @@ def main(build_config, argv):
         print_usage(build_config)
     # except EnvironmentError:
         # print('[]')
-
-
 
 if __name__ == '__main__':
     main(DEFAULT_BUILD_CONFIG, sys.argv)

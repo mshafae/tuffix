@@ -6,15 +6,9 @@
 import re
 import subprocess
 import os
-try:
-    from apt import apt_pkg
-except ImportError:
-    # dummy import to get testing done faster
-    from datetime import datetime as apt_pkg
+from apt import apt_pkg
 
 from Tuffix.Exceptions import *
-
-
 
 def distrib_codename():
     """
@@ -25,8 +19,7 @@ def distrib_codename():
         with open('/etc/lsb-release') as stream:
             return parse_distrib_codename(stream)
     except (OSError, FileNotFoundError):
-        # TODO: raise EnvironmentError
-        print("[ERROR] Cannot process /etc/lsb-release, not found. Is this Ubuntu?")
+        raise EnvironmentError("[ERROR] Cannot process /etc/lsb-release, not found. Is this Ubuntu?")
 
 def is_deb_package_installed(package_name):
     try:
@@ -35,8 +28,7 @@ def is_deb_package_installed(package_name):
         package = cache[package_name]
         return (package.current_state == apt_pkg.CURSTATE_INSTALLED)
     except KeyError:
-        # raise EnvironmentError('no such package "' + package_name + '"; is this Ubuntu?')
-        print(f'[ERROR] No such package "{package_name}"; is this Ubuntu?')
+        raise EnvironmentError(f'[ERROR] No such package "{package_name}"; is this Ubuntu?')
 
 def parse_distrib_codename(stream):
     """
@@ -52,14 +44,11 @@ def parse_distrib_codename(stream):
         match = _re.match(line)
         if(match):
             _match = match.group("name")
-            break
 
     if not(_match):
-        # TODO : raise exception for real
-        print("could not find a distrib name")
+        raise EnvironmentError("[ERROR] Could not find a distrib name")
     if(len(_match.split(' ') > 1)):
-        # TODO : raise exception for real
-        print("/etc/lsb-release syntax error")
+        raise EnvironmentError("[ERROR] /etc/lsb-release syntax error")
     return _match
 
 ################################################################################
