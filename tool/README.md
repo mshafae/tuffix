@@ -58,10 +58,10 @@
 - `ssh-add` was put into RekeyCommand's `ssh_gen` function 
 
 
-# Changelog (01/08/2020 at 14:40)
+# Changelog (01/10/2020 at 19:24)
 
-- Converting all string format calls to f-strings, as it is easier to read and mantain
-- Splitting up the library into separate files
-- Creating a proper `setup.py` that encompasses all external imports
-- Removing bloat (if present)
-    * TODO
+- [X] Converting all string format calls to f-strings, as it is easier to read and mantain
+- [X] Splitting up the library into separate files
+- [X] Creating a proper `setup.py` that encompasses all external imports
+- [X] Converted add_deb_package and remove_deb_package to edit_deb_package
+- [ ] Documentation
