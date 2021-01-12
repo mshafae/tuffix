@@ -1,0 +1,59 @@
+.center {
+  text-align: center;
+  border: 3px solid orange;
+  width : 500px;
+}
+ul#menu li {
+  display:inline;
+}
+
+/* Make sure the links never turn back to purple */
+
+a { color:white } /* Globally */
+
+/* Each state */
+
+/* Credit due here! -> https://stackoverflow.com/questions/10312857/blue-and-purple-default-links-how-to-remove */
+
+a:visited { text-decoration: none; color:white; }
+a:hover { text-decoration: none; color:white; }
+a:focus { text-decoration: none; color:yellow; }
+a:hover, a:active { text-decoration: none; color:grey }
+
+
+/* More credit due here -> https://www.w3schools.com/html/tryit.asp?filename=tryhtml_table_intro */
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 50%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+
+
+body {
+	font-family: 'Open Sans', serif;
+	line-height: 1.75em;
+	font-size: 16px;
+	background-color: #222;
+	color: #aaa;
+}
+
+.modal-header {
+  color: black;
+
+}
+
+.modal-body {
+    color: black;
+}
