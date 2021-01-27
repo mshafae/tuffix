@@ -6,7 +6,7 @@
 from Tuffix.Configuration import *
 from Tuffix.SudoRun import SudoRun
 from Tuffix.KeywordHelperFunctions import *
-from Tuffix.Status import in_VM
+from Tuffix.Status import *
 from zipfile import Zipfile
 import requests
 
@@ -410,8 +410,7 @@ class C351Keyword(AbstractKeyword):
     Point person: William McCarthy
     """
     # TODO
-    packages = ['intel2gas',
-                'nasm']
+    packages = [f'linux-headers-{current_kernel_revision()}']
 
     def __init__(self, build_config):
         super().__init__(build_config, 'C351', 'CPSC 351 (Operating Systems)')
