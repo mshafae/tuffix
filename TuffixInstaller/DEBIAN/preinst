@@ -4,8 +4,8 @@
 # AUTHOR: Jared Dyreson
 # INSTITUTION: California State University Fullerton
 
-sudo apt-get update
-sudo apt-get install -y python3-pip
+# sudo apt-get update
+# sudo apt-get install -y python3-pip
 # TODO: update the whole system now?
 # sudo apt-get upgrade -y
 sudo pip3 install git+https://git@github.com/mshafae/tuffix.git@TuffixLib
