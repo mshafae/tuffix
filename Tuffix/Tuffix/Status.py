@@ -23,6 +23,16 @@ import os
 import socket
 from datetime import datetime
 
+def in_VM() -> bool:
+    """
+    Goal: check if we're in a VM. Probably the most unreliable way to do this.
+    """
+
+    path = "/proc/scsi/scsi"
+    with open(path) as f:
+        contents = f.readlines()
+    return (len(contents) > 1)
+
 def cpu_information() -> str:
     """
     Goal: get current CPU model name and the amount of cores

@@ -6,6 +6,9 @@
 from Tuffix.Configuration import *
 from Tuffix.SudoRun import SudoRun
 from Tuffix.KeywordHelperFunctions import *
+from Tuffix.Status import in_VM
+from zipfile import Zipfile
+import requests
 
 class AbstractKeyword:
     def __init__(self, build_config, name, description):
@@ -397,6 +400,32 @@ class C240Keyword(AbstractKeyword):
  
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
+
+    def remove(self):
+        edit_deb_packages(self.packages, is_installing=False)
+
+class C351Keyword(AbstractKeyword):
+
+    """
+    Point person: William McCarthy
+    """
+    # TODO
+    packages = ['intel2gas',
+                'nasm']
+
+    def __init__(self, build_config):
+        super().__init__(build_config, 'C351', 'CPSC 351 (Operating Systems)')
+
+    def add(self):
+        edit_deb_packages(self.packages, is_installing=True)
+        silberschatz_url = "http://cs.westminstercollege.edu/~greg/osc10e/final-src-osc10e.zip"
+        r = requests.get(silberschatz_url)
+        stored = "/tmp/kernel-exercises.zip"
+        with open(stored, 'wb') as f:
+            f.write(r.content)
+
+        with ZipFile(stored, 'r') as zipObj:
+            zipObj.extractAll()
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
