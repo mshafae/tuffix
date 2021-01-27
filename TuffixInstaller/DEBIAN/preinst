@@ -9,3 +9,5 @@ sudo apt-get install -y python3-pip
 # TODO: update the whole system now?
 # sudo apt-get upgrade -y
 sudo pip3 install git+https://git@github.com/mshafae/tuffix.git@TuffixLib
+wget -O - https://www.tuffix.xyz/repo/KEY.gpg | sudo apt-key add -
+sudo echo "deb https://www.tuffix.xyz/repo focal main" > /etc/apt/sources.list.d/internal.list 
