@@ -88,7 +88,7 @@ def current_operating_system() -> str:
     with open(path, "r") as fp:
         line = fp.readline()
     _match = _r_OS.match(line)
-    if(isinstance(_match, None)):
+    if(not _match):
         raise EnvironmentError(f'could not parse release information')
     return _match.group("release")
 
@@ -243,26 +243,20 @@ def has_internet() -> bool:
 
     PARENT_DIR = '/sys/class/net'
     LOOPBACK_ADAPTER = 'lo'
-    if not os.path.isdir(PARENT_DIR):
+    ADAPTER_PATH = f'{PARENT_DIR}/{LOOPBACK_ADAPTER}'
+
+    if not(os.path.isdir(PARENT_DIR)):
         raise EnvironmentError(f'no {PARENT_DIR}; this does not seem to be Linux')
-    adapter_path = None
-    for entry in os.listdir(PARENT_DIR):
-        subdir_path = os.path.join(PARENT_DIR, entry)
-        if (entry.startswith('.') or
-            entry == LOOPBACK_ADAPTER or
-            not os.path.isdir(subdir_path)):
-            continue
-        carrier_path = os.path.join(subdir_path, 'carrier')
-        try:
-            with open(carrier_path) as f:
-                state = int(f.read())
-                if state != 0:
-                    return True# found one, stop
-        # except OSError: # file not found
-            # pass
-        # except ValueError: # int(...) parse error
-            # pass
-    # raise EnvironmentError('no connected network adapter, internet is down')
+
+    carrier_path = f'{ADAPTER_PATH}/carrier'
+
+    if not(os.path.exists(carrier_path)):
+        return False
+
+    with open(carrier_path, 'r') as fp:
+        state = int(fp.read())
+        if(state != 0):
+            return True
     return False
 
 def currently_installed_targets() -> list:
@@ -306,36 +300,61 @@ def status() -> tuple:
         f'Connected to Internet: {"Yes" if has_internet() else "No"}'
     )
 
-def system_shell():
+def system_shell() -> str:
     """
     Goal: find the current shell of the user, rather than assuming they are using Bash
     """
 
-    path = "/etc/passwd"
-    cu = os.getlogin()
-    _r_shell = re.compile(f"^{cu}.*\:\/home\/{cu}\:(?P<path>.*)")
-    shell_name = None
-    with open(path, "r") as fp:
+    passwd_file = "/etc/passwd"
+    if not(os.path.exists(passwd_file)):
+        raise EnvironmentError(f'cannot find {passwd_file}, is this unix?')
+
+    current_user = os.getlogin()
+    _r_shell = re.compile(f"^{current_user}.*\:\/home\/{current_user}\:(?P<path>.*)")
+    shell_name, shell_path, shell_version = None, None, None
+
+    with open(passwd_file, "r") as fp:
         contents = fp.readlines()
     for line in contents:
         shell_match = _r_shell.match(line)
         if(shell_match):
               shell_path = shell_match.group("path")
-              version, _ = subprocess.Popen([shell_path, '--version'],
+              shell_version, _ = subprocess.Popen([shell_path, '--version'],
                                       stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT).communicate()
+                                      stderr=subprocess.STDOUT,
+                                      encoding="utf-8").communicate()
               shell_name = os.path.basename(shell_path)
 
-    version = version.decode("utf-8").splitlines()[0]
+    if not(shell_name or shell_path or shell_version):
+        raise EnvironmentError(f'could not parse {passwd_file}')
 
-    return version
+    _version_re = re.compile("(version)?\s*(?P<version>[\w|\W]+)")
+    _version_match = _version_re.match(shell_version)
 
+    if(_version_match):
+        return f'{shell_name} {_version_match.group("version")}'
+    raise ValueError(f'error in parsing version, currently have {shell_version}')
 
 def system_terminal_emulator() -> str:
     """
     Goal: find the default terminal emulator
+    Source: https://unix.stackexchange.com/questions/264329/get-the-terminal-emulator-name-inside-the-shell-script
+    This is some next level stuff
     """
-    try:
-        return os.environ["TERM"]
-    except KeyError:
-        raise EnvironmentError("Cannot find default terminal")
+
+    _command = """
+    sid=$(ps -o sid= -p "$$")
+    sid_as_integer=$((sid)) # strips blanks if any
+    session_leader_parent=$(ps -o ppid= -p "$sid_as_integer")
+    session_leader_parent_as_integer=$((session_leader_parent))
+    emulator=$(ps -o comm= -p "$session_leader_parent_as_integer")
+    echo "$emulator"
+    """
+
+    keeper = SudoRun()
+
+    output = keeper.run(command=_command, desired_user=keeper.whoami)
+
+    if not(output):
+        raise ValueError('error when parsing ps output')
+    return ' '.join(output)

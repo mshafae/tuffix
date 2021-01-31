@@ -35,8 +35,10 @@ class SudoRun():
         if not(isinstance(user, str)):
             raise ValueError
 
-        passwd_path = pathlib.Path("/etc/passwd")
-        contents = [line for line in passwd_path.open()]
+        passwd_path = "/etc/passwd"
+
+        with open(passwd_path, "r") as fp:
+            contents = fp.readlines()
         return user in [re.search('^(?P<name>.+?)\:', line).group("name") for line in contents]
 
     def run(self, command: str, desired_user: str) -> list:
