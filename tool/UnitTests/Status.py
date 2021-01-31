@@ -22,17 +22,6 @@ from termcolor import colored
 import os
 import socket
 from datetime import datetime
-from shutil import which
-
-def is_tool(command: str) -> bool:
-    """
-    Goal: Check if command exists
-    Source: https://stackoverflow.com/questions/11210104/check-if-a-program-exists-from-a-python-script#34177358
-    """
-
-    if not(isinstance(command, str)):
-        raise ValueError
-    return which(command) is not None
 
 def in_VM() -> bool:
     """
@@ -82,21 +71,14 @@ def current_operating_system() -> str:
     """
 
     path = "/etc/os-release"
-    if not(os.path.exists(path)):
-        raise EnvironmentError(f'could not get release information, {path} does not exist')
-    _r_OS = re.compile('NAME\=\"(?P<release>[a-zA-Z].*)\"')
-    with open(path, "r") as fp:
-        line = fp.readline()
-    _match = _r_OS.match(line)
-    if(isinstance(_match, None)):
-        raise EnvironmentError(f'could not parse release information')
-    return _match.group("release")
+    _r_OS = r'NAME\=\"(?P<release>[a-zA-Z].*)\"'
+    with open(path, "r") as fp: line = fp.readline()
+    return re.compile(_r_OS).match(line).group("release")
 
 def current_kernel_revision() -> str:
     """
     Goal: get the current kernel version
     """
-
     return os.uname().release
 
 def current_time() -> str:
@@ -114,17 +96,12 @@ def current_model() -> str:
     product_name = "/sys/devices/virtual/dmi/id/product_name"
     product_family = "/sys/devices/virtual/dmi/id/product_family"
     vendor_name = "/sys/devices/virtual/dmi/id/sys_vendor"
-
-    if not(
-        os.path.exists(product_name) or
-        os.path.exists(product_family) or
-        os.path.exists(vendor_name)):
-        raise EnvironmentError(f'could not find system information files')
-
-    with open(product_name, "r") as pn, open(product_family, "r") as pf, open(vendor_name, "r") as vn:
-        name   = pn.readline().strip('\n')
-        family = pf.readline().strip('\n')
-        vendor = vn.readline().strip('\n')
+    with open(product_name, "r") as fp:
+        name = fp.readline().strip('\n')
+    with open(product_family, "r") as fp:
+        family = fp.readline().strip('\n')
+    with open(vendor_name, "r") as fp:
+        vendor = fp.read().split()[0].strip('\n')
 
     vendor = "" if vendor in name else vendor
     family = "" if name not in family else family
@@ -137,12 +114,8 @@ def current_uptime() -> str:
     """
 
     path = "/proc/uptime"
-    if not(os.path.exists(path)):
-        raise EnvironmentError(f'could not open {path}, is this unix?')
-
     with open(path, 'r') as f:
         total_seconds = float(f.readline().split()[0])
-
 
     MINUTE  = 60
     HOUR    = MINUTE * 60
@@ -162,15 +135,11 @@ def memory_information() -> int:
 
     formatting = lambda quantity, power: quantity/(1000**power)
     path = "/proc/meminfo"
-    if not(os.path.exists(path)):
-        raise EnvironmentError(f'could not open {path}, is this unix?')
-
     with open(path, "r") as fp:
         total = int(fp.readline().split()[1])
-
     return int(formatting(total, 2))
 
-def graphics_information() -> tuple:
+def graphics_information() -> str:
     """
     Use lspci to get the current graphics card in use
     Requires pciutils to be installed (seems to be installed by default on Ubuntu)
@@ -180,20 +149,7 @@ def graphics_information() -> tuple:
     primary, secondary = None, None
     vga_regex, controller_regex = re.compile("VGA.*\:(?P<model>(?:(?!\s\().)*)"), re.compile("3D.*\:(?P<model>(?:(?!\s\().)*)")
 
-    _default_shell_path, _lspci_path = which("bash"), which("lspci")
-
-    if(not _default_shell_path):
-        raise EnvironmentError(f'could not find bash')
-    if(not _lspci_path):
-        raise EnvironmentError(f'could not find lspci')
-
-    _lspci_output = subprocess.check_output(_lspci_path,
-                                            shell=True,
-                                            executable=_default_shell_path,
-                                            encoding="utf-8",
-                                            universal_newlines="\n").splitlines()
-
-    for line in _lspci_output:
+    for line in subprocess.check_output("lspci", shell=True, executable='/bin/bash').decode("utf-8").splitlines():
         primary_match, secondary_match = vga_regex.search(line), controller_regex.search(line)
         if(primary_match and not primary):
             primary = primary_match.group("model").strip()
@@ -202,12 +158,7 @@ def graphics_information() -> tuple:
         elif(primary and secondary):
             break
 
-    if(not primary and
-       not secondary):
-       raise EnvironmentError('could not identify primary or secondary video out source')
-
-    primary, secondary = colored(primary, 'green'), colored("None" if not secondary else secondary, 'red')
-    return (primary, secondary)
+    return colored(primary, 'green'), colored("None" if not secondary else secondary, 'red')
 
 
 def list_git_configuration() -> tuple:
@@ -215,36 +166,27 @@ def list_git_configuration() -> tuple:
     Retrieve Git configuration information about the current user
     """
     keeper = SudoRun()
-    _git_path = which("git")
-    if not(_git_path):
-        raise EnvironmentError('could not find git')
 
     username_regex = re.compile("user.name\=(?P<user>.*$)")
     email_regex = re.compile("user.email\=(?P<email>.*$)")
-
-    out = keeper.run(command=f"{_git_path} --no-pager config --list", desired_user=keeper.whoami)
-    user, email = None, None
-
+    out = keeper.run(command="git --no-pager config --list", desired_user=keeper.whoami)
+    u, e = None, None
     for line in out:
-        user_match = username_regex.match(line)
-        email_match = email_regex.match(line)
-        if(user_match):
-            user = user_match.group("user")
-        elif(email_match):
-            email = email_match.group("email")
+        u_match = username_regex.match(line)
+        e_match = email_regex.match(line)
+        if(u is None and u_match):
+            u = u_match.group("user")
+        elif(e is None and e_match):
+            e = e_match.group("email")
 
-    return (user, email) if(user and email) else ("None", "None")
+    return (u, e) if(u and e) else ("None", "None")
 
 def has_internet() -> bool:
-    """
-    i dont think throwing exception if no internet is good
-    setting as bool for unit tests
-    """
 
     PARENT_DIR = '/sys/class/net'
     LOOPBACK_ADAPTER = 'lo'
     if not os.path.isdir(PARENT_DIR):
-        raise EnvironmentError(f'no {PARENT_DIR}; this does not seem to be Linux')
+        raise EnvironmentError('no ' + PARENT_DIR + '; this does not seem to be Linux')
     adapter_path = None
     for entry in os.listdir(PARENT_DIR):
         subdir_path = os.path.join(PARENT_DIR, entry)
@@ -258,31 +200,32 @@ def has_internet() -> bool:
                 state = int(f.read())
                 if state != 0:
                     return True# found one, stop
-        # except OSError: # file not found
-            # pass
-        # except ValueError: # int(...) parse error
-            # pass
-    # raise EnvironmentError('no connected network adapter, internet is down')
-    return False
+        except OSError: # file not found
+            pass
+        except ValueError: # int(...) parse error
+            pass
+    raise EnvironmentError('no connected network adapter, internet is down')
 
 def currently_installed_targets() -> list:
     """
     GOAL: list all installed codewords in a formatted list
     """
-
     return [f'{"- ": >4} {element}' for element in read_state(DEFAULT_BUILD_CONFIG).installed]
 
 
-def status() -> tuple:
+def status() -> str:
     """
     GOAL: Driver code for all the components defined above
     """
-
-    git_email, git_username = list_git_configuration()
+    try:
+        git_username, git_email = list_git_configuration()
+    except Exception as e:
+        print('[ERROR]: git is not configured')
+        git_email, git_username = "None", "None"
+    list_git_configuration()
     primary, secondary = graphics_information()
     installed_targets = currently_installed_targets()
     installed_targets = '\n'.join(installed_targets).strip() if (installed_targets) else "None"
-
     return (
         f'{host()}',
         '-----',
