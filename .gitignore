@@ -1,4 +1,5 @@
 .vagrant/
 *.box
+*egg-info
 __pycache__
-evnironment
+*environment*
