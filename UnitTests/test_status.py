@@ -8,7 +8,7 @@ from Tuffix.Status import *
 from Tuffix.Exceptions import *
 from subprocess import CalledProcessError
 
-class TestCommands(unittest.TestCase):
+class TestStatus(unittest.TestCase):
     def test_in_VM(self):
         """
         Assuming we are running in a VM for testing
