@@ -6,9 +6,13 @@
 import re
 import subprocess
 import os
+import requests
+from pathlib import Path
+
 from apt import apt_pkg
 
 from Tuffix.Exceptions import *
+from Tuffix.LSBParser import lsb_parser
 
 def distrib_codename():
     """
@@ -92,8 +96,37 @@ def set_background(path: str):
     if not(isinstance(path, str)):
         raise ValueError
 
+    lsb_parser_ = lsb_parser()
+    _id = lsb_parser.id
+    _session = str(os.environ.get('DESKTOP_SESSION'))
+
+    if not(
+            (_id == "Ubuntu") or
+            (_session == 'gnome')
+        ):
+        raise EnvironmentError(f'cannot continue; this machine is neither Ubuntu ({_id}) or running gnome ({_session}).')
+
     SCHEMA = "org.gnome.desktop.background"
     KEY = "picture-uri"
 
     gsettings = Gio.Settings.new(SCHEMA)
     gsettings.set_string(KEY, f'file://{path}')
+
+def get_user_submitted_wallpaper():
+    pictures_directory = f'{Path.home()}/Pictures/Wallpapers'
+    url = "https://speckyboy.com/wp-content/uploads/2020/11/high-resolution-4k-desktop-wallpaper-03.jpg"
+    name = "SpacialRend"
+    person = "Jared Dyreson"
+    output = f'{pictures_directory}/{name}.jpg'
+
+    if not(os.path.exists(pictures_directory)):
+        os.makedirs(pictures_directory)
+
+    req = requests.get(url)
+    if("image" in req.headers['content-type']):
+        with open(output, 'wb') as fp:
+            fp.write(req.content)
+    else:
+        raise EnvironmentError(f'{url} contains file that is not an image; indexing error?')
+
+    set_background(output)
