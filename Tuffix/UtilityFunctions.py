@@ -87,3 +87,13 @@ def create_state_directory(build_config):
     ensure_root_access()
     dir_path = os.path.dirname(build_config.state_path)
     os.makedirs(dir_path, exist_ok=True)
+
+def set_background(path: str):
+    if not(isinstance(path, str)):
+        raise ValueError
+
+    SCHEMA = "org.gnome.desktop.background"
+    KEY = "picture-uri"
+
+    gsettings = Gio.Settings.new(SCHEMA)
+    gsettings.set_string(KEY, f'file://{path}')
