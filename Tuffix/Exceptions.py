@@ -1,7 +1,7 @@
-################################################################################
+##########################################################################
 # exception types
 # AUTHORS: Kevin Wortman , Jared Dyreson
-################################################################################
+##########################################################################
 
 class MessageException(Exception):
     """
@@ -13,6 +13,7 @@ class MessageException(Exception):
             raise ValueError
         self.message = message
 
+
 class UsageError(MessageException):
     """
     Commandline usage error
@@ -20,6 +21,7 @@ class UsageError(MessageException):
 
     def __init__(self, message):
         super().__init__(message)
+
 
 class EnvironmentError(MessageException):
     """
@@ -29,6 +31,7 @@ class EnvironmentError(MessageException):
     def __init__(self, message):
         super().__init__(message)
 
+
 class StatusError(MessageException):
     """
     Issue reported by the `status` command, that's at the level of a fatal error
@@ -36,6 +39,7 @@ class StatusError(MessageException):
 
     def __init__(self, message):
         super().__init__(message)
+
 
 class StatusWarning(MessageException):
     """
@@ -45,6 +49,7 @@ class StatusWarning(MessageException):
     def __init__(self, message):
         super().__init__(message)
 
+
 class UnknownUserException(MessageException):
     """
     issue reported when sudo_run class cannot find a given user.
@@ -53,6 +58,7 @@ class UnknownUserException(MessageException):
 
     def __init__(self, message):
         super().__init__(message)
+
 
 class PrivilageExecutionException(MessageException):
     """

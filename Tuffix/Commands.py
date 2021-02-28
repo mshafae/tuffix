@@ -1,7 +1,7 @@
-################################################################################
+##########################################################################
 # user-facing commands (init, add, etc.)
 # AUTHORS: Kevin Wortman, Jared Dyreson
-################################################################################
+##########################################################################
 
 from Tuffix.Configuration import BuildConfig, State
 from Tuffix.Constants import *
@@ -13,6 +13,8 @@ import os
 
 # abstract base class for one of the user-visible tuffix commands, e.g.
 # init, status, etc.
+
+
 class AbstractCommand:
     # build_config: a BuildConfig object
     # name: the string used for the command one the commandline, e.g 'init'.
@@ -52,6 +54,7 @@ class AbstractCommand:
 
 # not meant to be added to list of commands
 
+
 class MarkCommand(AbstractCommand):
     """
     GOAL: combine both the add and remove keywords
@@ -69,50 +72,64 @@ class MarkCommand(AbstractCommand):
     def execute(self, arguments):
         if not (isinstance(arguments, list) and
                 all([isinstance(argument, str) for argument in arguments])):
-                raise ValueError
+            raise ValueError
 
         if not(arguments):
             raise UsageError("you must supply at least one keyword to mark")
 
         # ./tuffix add base media latex
-        collection = [find_keyword(self.build_config, arguments[x]) for x, _ in enumerate(arguments)]
+        collection = [
+            find_keyword(
+                self.build_config,
+                arguments[x]) for x,
+            _ in enumerate(arguments)]
 
         state = read_state(self.build_config)
         first_arg = arguments[0]
         install = True if self.command == "add" else False
 
         # for console messages
-        verb, past = ("installing", "installed") if install else ("removing", "removed")
+        verb, past = (
+            "installing", "installed") if install else (
+            "removing", "removed")
 
         # ./tuffix add all
         # ./tuffix remove all
 
         if(first_arg == "all"):
             try:
-                input("are you sure you want to install/remove all packages? Press enter to continue or CTRL-D to exit: ")
+                input(
+                    "are you sure you want to install/remove all packages? Press enter to continue or CTRL-D to exit: ")
             except EOFError:
                 quit()
             if(install):
-                collection = [word for word in all_keywords(self.build_config) if word.name != first_arg]
+                collection = [
+                    word for word in all_keywords(
+                        self.build_config) if word.name != first_arg]
             else:
-                collection = [find_keyword(self.build_config, element) for element in state.installed]
+                collection = [
+                    find_keyword(
+                        self.build_config,
+                        element) for element in state.installed]
 
         ensure_root_access()
 
         for element in collection:
             if((element.name in state.installed)):
                 if(install):
-                    raise UsageError(f'tuffix: cannot add {element.name}, it is already installed')
+                    raise UsageError(
+                        f'tuffix: cannot add {element.name}, it is already installed')
             elif((element.name not in state.installed) and (not install)):
-                raise UsageError(f'cannot remove candidate {element.name}; not installed')
+                raise UsageError(
+                    f'cannot remove candidate {element.name}; not installed')
 
             print(f'[INFO] Tuffix: {verb} {element.name}')
 
             try:
-                 getattr(element, self.command)()
+                getattr(element, self.command)()
             except AttributeError:
-                raise UsageError(f'{element.__name__} does not have the function {self.command}')
-
+                raise UsageError(
+                    f'{element.__name__} does not have the function {self.command}')
 
             new_action = state.installed
 
@@ -130,6 +147,7 @@ class MarkCommand(AbstractCommand):
 
             print(f'[INFO] Tuffix: successfully {past} {element.name}')
 
+
 class AddCommand(AbstractCommand):
     def __init__(self, build_config):
         super().__init__(build_config, 'add', 'add (install) one or more keywords')
@@ -137,6 +155,7 @@ class AddCommand(AbstractCommand):
 
     def execute(self, arguments):
         self.mark.execute(arguments)
+
 
 class DescribeCommand(AbstractCommand):
 
@@ -146,12 +165,13 @@ class DescribeCommand(AbstractCommand):
     def execute(self, arguments):
         if not (isinstance(arguments, list) and
                 all([isinstance(argument, str) for argument in arguments])):
-                raise ValueError
+            raise ValueError
         if(len(arguments) != 1):
             raise UsageError("Please supply at only one keyword to describe")
 
         keyword = find_keyword(self.build_config, arguments[0])
         print(f'{keyword.name}: {keyword.description}')
+
 
 class RekeyCommand(AbstractCommand):
 
@@ -175,7 +195,8 @@ class RekeyCommand(AbstractCommand):
         os.chmod(public_path, 0o600)
         os.chmod(private_path, 0o600)
         print(f'sending keys to {self.build_config.server_path}')
-        subprocess.call(f'ssh-copy-id -i {public_path} {self.build_config.server_path}'.split())
+        subprocess.call(
+            f'ssh-copy-id -i {public_path} {self.build_config.server_path}'.split())
 
     def gpg_gen(self):
 
@@ -185,19 +206,19 @@ class RekeyCommand(AbstractCommand):
 
         print("[INFO] Please wait a moment, this may take some time")
         input_data = gpg.gen_key_input(
-            key_type = "RSA",
-            key_length = 4096,
-            name_real = self.name,
-            name_comment = f'Autogenerated by tuffix for {self.name}',
-            name_email = self.email,
-            passphrase = self.passphrase
+            key_type="RSA",
+            key_length=4096,
+            name_real=self.name,
+            name_comment=f'Autogenerated by tuffix for {self.name}',
+            name_email=self.email,
+            passphrase=self.passphrase
         )
         key = gpg.gen_key(input_data)
         public = gpg.export_keys(key.fingerprint, False)
         private = gpg.export_keys(
             key.fingerprint,
             False,
-            passphrase = self.passphrase
+            passphrase=self.passphrase
         )
 
         with open(gpg_file, 'w') as fp:
@@ -212,7 +233,7 @@ class RekeyCommand(AbstractCommand):
     def execute(self, arguments):
         if not (isinstance(arguments, list) and
                 all([isinstance(argument, str) for argument in arguments])):
-                raise ValueError
+            raise ValueError
         if(len(arguments) != 1):
             raise UsageError("Please supply at only one keyword to regen")
 
@@ -225,7 +246,9 @@ class RekeyCommand(AbstractCommand):
             self.gpg_gen()
 
         else:
-            raise UsageError(f'[ERROR] Invalid selection {regen_entity}. "ssh" and "gpg" are the only valid selectors')
+            raise UsageError(
+                f'[ERROR] Invalid selection {regen_entity}. "ssh" and "gpg" are the only valid selectors')
+
 
 class InitCommand(AbstractCommand):
     def __init__(self, build_config):
@@ -234,7 +257,7 @@ class InitCommand(AbstractCommand):
     def execute(self, arguments):
         if not (isinstance(arguments, list) and
                 all([isinstance(argument, str) for argument in arguments])):
-                raise ValueError
+            raise ValueError
 
         if len(arguments) != 0:
             raise UsageError("init command does not accept arguments")
@@ -248,6 +271,7 @@ class InitCommand(AbstractCommand):
 
         print('[INFO] Tuffix init succeeded')
 
+
 class InstalledCommand(AbstractCommand):
     def __init__(self, build_config):
         super().__init__(build_config, 'installed', 'list all currently-installed keywords')
@@ -255,7 +279,7 @@ class InstalledCommand(AbstractCommand):
     def execute(self, arguments):
         if not (isinstance(arguments, list) and
                 all([isinstance(argument, str) for argument in arguments])):
-                raise ValueError
+            raise ValueError
 
         if len(arguments) != 0:
             raise UsageError("installed command does not accept arguments")
@@ -269,6 +293,7 @@ class InstalledCommand(AbstractCommand):
             for name in state.installed:
                 print(name)
 
+
 class ListCommand(AbstractCommand):
     def __init__(self, build_config):
         super().__init__(build_config, 'list', 'list all available keywords')
@@ -276,7 +301,7 @@ class ListCommand(AbstractCommand):
     def execute(self, arguments):
         if not (isinstance(arguments, list) and
                 all([isinstance(argument, str) for argument in arguments])):
-                raise ValueError
+            raise ValueError
 
         if len(arguments) != 0:
             raise UsageError("list command does not accept arguments")
@@ -287,6 +312,7 @@ class ListCommand(AbstractCommand):
                   '  ' +
                   keyword.description)
 
+
 class StatusCommand(AbstractCommand):
     def __init__(self, build_config):
         super().__init__(build_config, 'status', 'status of the current host')
@@ -294,13 +320,14 @@ class StatusCommand(AbstractCommand):
     def execute(self, arguments):
         if not (isinstance(arguments, list) and
                 all([isinstance(argument, str) for argument in arguments])):
-                raise ValueError
+            raise ValueError
 
         if len(arguments) != 0:
             raise UsageError("status command does not accept arguments")
 
         for line in status():
             print(line)
+
 
 class RemoveCommand(AbstractCommand):
     def __init__(self, build_config):
@@ -319,11 +346,11 @@ def all_commands(build_config):
     if not isinstance(build_config, BuildConfig):
         raise ValueError
     # alphabetical order
-    return [ AddCommand(build_config),
-             DescribeCommand(build_config),
-             InitCommand(build_config),
-             InstalledCommand(build_config),
-             ListCommand(build_config),
-             StatusCommand(build_config),
-             RemoveCommand(build_config),
-             RekeyCommand(build_config) ]
+    return [AddCommand(build_config),
+            DescribeCommand(build_config),
+            InitCommand(build_config),
+            InstalledCommand(build_config),
+            ListCommand(build_config),
+            StatusCommand(build_config),
+            RemoveCommand(build_config),
+            RekeyCommand(build_config)]

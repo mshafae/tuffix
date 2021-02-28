@@ -10,6 +10,7 @@ import pathlib
 import subprocess
 import re
 
+
 class SudoRun():
     def __init__(self):
         self.whoami = os.getlogin()
@@ -21,11 +22,10 @@ class SudoRun():
 
         if not(isinstance(user_id, int) and
                 isinstance(user_gid, int)):
-                raise ValueError
+            raise ValueError
 
         os.setgid(user_gid)
         os.setuid(user_id)
-
 
     def check_user(self, user: str):
         """
@@ -39,7 +39,10 @@ class SudoRun():
 
         with open(passwd_path, "r") as fp:
             contents = fp.readlines()
-        return user in [re.search('^(?P<name>.+?)\:', line).group("name") for line in contents]
+        return user in [
+            re.search(
+                '^(?P<name>.+?)\\:',
+                line).group("name") for line in contents]
 
     def run(self, command: str, desired_user: str) -> list:
         """
@@ -50,7 +53,7 @@ class SudoRun():
 
         if not(isinstance(command, str) and
                isinstance(desired_user, str)):
-               raise ValueError
+            raise ValueError
 
         if not(self.check_user(desired_user)):
             raise UnknownUserException(f'Unknown user: {desired_user}')
@@ -58,10 +61,13 @@ class SudoRun():
         current_user = os.getlogin()
 
         if((current_user == "root") and (os.getuid() != 0)):
-            raise PrivilageExecutionException(f'{current_user} does not have permission to run the command {command} as the user {desired_user}')
+            raise PrivilageExecutionException(
+                f'{current_user} does not have permission to run the command {command} as the user {desired_user}')
 
         command = f'sudo -H -u {desired_user} bash -c \'{command}\''
 
-        return [line for line in subprocess.check_output(command,
-                               shell=True,
-                               encoding="utf-8").split('\n') if line]
+        return [
+            line for line in subprocess.check_output(
+                command,
+                shell=True,
+                encoding="utf-8").split('\n') if line]

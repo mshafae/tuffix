@@ -1,7 +1,7 @@
-################################################################################
+##########################################################################
 # configuration
 # AUTHOR(S): Kevin Wortman
-################################################################################
+##########################################################################
 
 """
 NOTE:
@@ -22,6 +22,8 @@ import json
 
 # Configuration defined at build-time. This is a class so that we can
 # unit test with dependency injection.
+
+
 class BuildConfig:
     # version: packaging.Version for the currently-running tuffix
     # state_path: pathlib.Path holding the path to state.json
@@ -35,9 +37,11 @@ class BuildConfig:
         self.version = version
         self.state_path = state_path
 
+
 # Singleton BuildConfig object using the constants declared at the top of
 # this file.
 DEFAULT_BUILD_CONFIG = BuildConfig(VERSION, STATE_PATH)
+
 
 class State:
     """
@@ -62,14 +66,16 @@ class State:
     def write(self):
         with open(self.build_config.state_path, 'w') as f:
             document = {
-                'version' : str(self.version),
-                'installed' : self.installed
+                'version': str(self.version),
+                'installed': self.installed
             }
             json.dump(document, f)
 
 # Reads the current state.
 # build_config: A BuildConfig object.
 # raises EnvironmentError if there is a problem.
+
+
 def read_state(build_config):
     if not isinstance(build_config, BuildConfig):
         raise ValueError
@@ -80,7 +86,8 @@ def read_state(build_config):
                          packaging.version.Version(document['version']),
                          document['installed'])
     except (OSError, FileNotFoundError):
-        raise EnvironmentError('state file not found, you must run $ tuffix init')
+        raise EnvironmentError(
+            'state file not found, you must run $ tuffix init')
     except json.JSONDecodeError:
         raise EnvironmentError('state file JSON is corrupted')
     except packaging.version.InvalidVersion:
@@ -89,4 +96,3 @@ def read_state(build_config):
         raise EnvironmentError('state file JSON is missing required keys')
     except ValueError:
         raise EnvironmentError('state file JSON has malformed values')
-

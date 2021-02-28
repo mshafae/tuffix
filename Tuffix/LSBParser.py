@@ -7,6 +7,7 @@ inspiration from this: https://chromium.googlesource.com/chromiumos/docs/+/HEAD/
 AUTHOR: Jared Dyreson
 """
 
+
 class lsb_parser():
     def __init__(self):
         self.path = "/etc/lsb-release"
@@ -20,19 +21,21 @@ class lsb_parser():
             self.id = self.lsb_id()
             self.release_type = self.lsb_release_type()
         except KeyError:
-            raise EnvironmentError('/etc/lsb-release syntax errors, please consult file')
+            raise EnvironmentError(
+                '/etc/lsb-release syntax errors, please consult file')
 
     def load(self):
         with open(self.path, 'r') as fp:
             lines = [line.rstrip() for line in fp]
 
         content = {}
-        _value_re = re.compile("[\'|\"](?P<content>(\w+\s*)*)[\'|\"]")
+        _value_re = re.compile("[\'|\"](?P<content>(\\w+\\s*)*)[\'|\"]")
         for line in lines:
             if not(line.startswith('#')):
                 key, value = line.partition('=')[::2]
                 _value_match = _value_re.match(value)
-                content[key] = _value_match.group("content") if (_value_match) else value
+                content[key] = _value_match.group(
+                    "content") if (_value_match) else value
         return content
 
     def lsb_version(self) -> float:

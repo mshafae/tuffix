@@ -1,7 +1,7 @@
-################################################################################
+##########################################################################
 # miscellaneous utility functions
 # AUTHORS: Kevin Wortman, Jared Dyreson
-################################################################################
+##########################################################################
 
 import re
 import subprocess
@@ -14,6 +14,7 @@ from apt import apt_pkg
 from Tuffix.Exceptions import *
 from Tuffix.LSBParser import lsb_parser
 
+
 def distrib_codename():
     """
     Read and parse the release codename from /etc/lsb-release .
@@ -23,7 +24,9 @@ def distrib_codename():
         with open('/etc/lsb-release') as stream:
             return parse_distrib_codename(stream)
     except (OSError, FileNotFoundError):
-        raise EnvironmentError("[ERROR] Cannot process /etc/lsb-release, not found. Is this Ubuntu?")
+        raise EnvironmentError(
+            "[ERROR] Cannot process /etc/lsb-release, not found. Is this Ubuntu?")
+
 
 def is_deb_package_installed(package_name):
     try:
@@ -32,7 +35,9 @@ def is_deb_package_installed(package_name):
         package = cache[package_name]
         return (package.current_state == apt_pkg.CURSTATE_INSTALLED)
     except KeyError:
-        raise EnvironmentError(f'[ERROR] No such package "{package_name}"; is this Ubuntu?')
+        raise EnvironmentError(
+            f'[ERROR] No such package "{package_name}"; is this Ubuntu?')
+
 
 def parse_distrib_codename(stream):
     """
@@ -55,9 +60,10 @@ def parse_distrib_codename(stream):
         raise EnvironmentError("[ERROR] /etc/lsb-release syntax error")
     return _match
 
-################################################################################
+##########################################################################
 # system probing functions (gathering info about the environment)
-################################################################################
+##########################################################################
+
 
 def ensure_root_access():
     """
@@ -65,11 +71,14 @@ def ensure_root_access():
     """
 
     if os.getuid() != 0:
-        raise UsageError('you do not have root access; run this command like $ sudo tuffix ...')
+        raise UsageError(
+            'you do not have root access; run this command like $ sudo tuffix ...')
+
 
 def ensure_ubuntu():
     if not(os.path.exists("/etc/debian_release")):
         raise UsageError('this is not an Debian derivative, please try again')
+
 
 def ensure_shell_command_exists(name):
     """
@@ -83,9 +92,12 @@ def ensure_shell_command_exists(name):
     try:
         result = subprocess.run(['which', name])
         if result.returncode != 0:
-            raise EnvironmentError(f'command "{name}" not found; this does not seem to be Ubuntu')
+            raise EnvironmentError(
+                f'command "{name}" not found; this does not seem to be Ubuntu')
     except FileNotFoundError:
-        raise EnvironmentError("no 'which' command; this does not seem to be Linux")
+        raise EnvironmentError(
+            "no 'which' command; this does not seem to be Linux")
+
 
 def create_state_directory(build_config):
     """
@@ -96,8 +108,10 @@ def create_state_directory(build_config):
     dir_path = os.path.dirname(build_config.state_path)
     os.makedirs(dir_path, exist_ok=True)
 
+
 def set_background(path: str):
-    # source: https://itectec.com/ubuntu/ubuntu-how-to-change-the-wallpaper-using-a-python-script/
+    # source:
+    # https://itectec.com/ubuntu/ubuntu-how-to-change-the-wallpaper-using-a-python-script/
 
     if not(isinstance(path, str)):
         raise ValueError
@@ -107,16 +121,18 @@ def set_background(path: str):
     _session = str(os.environ.get('DESKTOP_SESSION'))
 
     if not(
-            (_id == "Ubuntu") or
-            (_session == 'gnome')
-        ):
-        raise EnvironmentError(f'cannot continue; this machine is neither Ubuntu ({_id}) or running gnome ({_session}).')
+        (_id == "Ubuntu") or
+        (_session == 'gnome')
+    ):
+        raise EnvironmentError(
+            f'cannot continue; this machine is neither Ubuntu ({_id}) or running gnome ({_session}).')
 
     SCHEMA = "org.gnome.desktop.background"
     KEY = "picture-uri"
 
     gsettings = Gio.Settings.new(SCHEMA)
     gsettings.set_string(KEY, f'file://{path}')
+
 
 def get_user_submitted_wallpaper():
     # making a rest API for this
@@ -135,6 +151,7 @@ def get_user_submitted_wallpaper():
         with open(output, 'wb') as fp:
             fp.write(req.content)
     else:
-        raise EnvironmentError(f'{url} contains file that is not an image; indexing error?')
+        raise EnvironmentError(
+            f'{url} contains file that is not an image; indexing error?')
 
     set_background(output)

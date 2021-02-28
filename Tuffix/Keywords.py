@@ -1,7 +1,7 @@
-################################################################################
+##########################################################################
 # keywords
 # AUTHORS: Kevin Wortman, Jared Dyreson
-################################################################################
+##########################################################################
 
 from Tuffix.Configuration import *
 from Tuffix.SudoRun import SudoRun
@@ -10,6 +10,7 @@ from Tuffix.Status import *
 from zipfile import Zipfile
 import requests
 import json
+
 
 class AbstractKeyword:
     def __init__(self, build_config, name, description):
@@ -31,17 +32,22 @@ class AbstractKeyword:
 # identifiers may not. If a keyword name starts with a digit, prepend
 # the class name with C (for Course).
 
+
 class AllKeyword(AbstractKeyword):
     packages = []
 
     def __init__(self, build_config):
-        super().__init__(build_config, 'all', 'all keywords available (glob pattern); to be used in conjunction with remove or add respectively')
+        super().__init__(
+            build_config,
+            'all',
+            'all keywords available (glob pattern); to be used in conjunction with remove or add respectively')
 
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class GeneralKeyword(AbstractKeyword):
 
@@ -75,13 +81,17 @@ class GeneralKeyword(AbstractKeyword):
                 'vim-gtk3']
 
     def __init__(self, build_config):
-        super().__init__(build_config, 'general', 'General configuration, not tied to any specific course')
+        super().__init__(
+            build_config,
+            'general',
+            'General configuration, not tied to any specific course')
 
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class BaseKeyword(AbstractKeyword):
 
@@ -90,28 +100,27 @@ class BaseKeyword(AbstractKeyword):
     """
 
     packages = ['build-essential',
-              'clang',
-              'clang-format',
-              'clang-tidy',
-              'cmake',
-              'code',
-              'gdb',
-              'gcc',
-              'git',
-              'g++',
-              'libc++-dev',
-              'libc++abi-dev',
-              'libgconf-2-4',
-              'libgtest-dev',
-              'libgmock-dev',
-              'lldb',
-              'python2']
-
+                'clang',
+                'clang-format',
+                'clang-tidy',
+                'cmake',
+                'code',
+                'gdb',
+                'gcc',
+                'git',
+                'g++',
+                'libc++-dev',
+                'libc++abi-dev',
+                'libgconf-2-4',
+                'libgtest-dev',
+                'libgmock-dev',
+                'lldb',
+                'python2']
 
     def __init__(self, build_config):
         super().__init__(build_config,
-                       'base',
-                       'CPSC 120-121-131-301 C++ development environment')
+                         'base',
+                         'CPSC 120-121-131-301 C++ development environment')
 
     def add(self):
         self.add_vscode_repository()
@@ -135,14 +144,14 @@ class BaseKeyword(AbstractKeyword):
         with open(asc_path, "w") as f:
             f.write(requests.get(url).content.decode("utf-8"))
 
-        subprocess.check_output(('gpg', '--output', f'{gpg_path}', '--dearmor', f'{asc_path}'))
+        subprocess.check_output(
+            ('gpg', '--output', f'{gpg_path}', '--dearmor', f'{asc_path}'))
         subprocess.run(sudo_install_command.split())
 
         vscode_source = pathlib.Path("/etc/apt/sources.list.d/vscode.list")
         vscode_ppa = "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main"
         with open(vscode_source, "a") as fp:
             fp.write(vscode_ppa)
-
 
     def configure_git(self, username=None, mail=None):
         """
@@ -187,7 +196,9 @@ class BaseKeyword(AbstractKeyword):
         for plugin in atom_plugins:
             print(f'[INFO] Installing {plugin}...')
             executor.run(f'/usr/bin/apm install {plugin}', normal_user)
-            executor.run(f'chown {normal_user} -R {atom_conf_dir}', normal_user)
+            executor.run(
+                f'chown {normal_user} -R {atom_conf_dir}',
+                normal_user)
         print("[INFO] Finished installing Atom")
 
     def google_test_build(self):
@@ -204,17 +215,17 @@ class BaseKeyword(AbstractKeyword):
         subprocess.run(['git', 'clone', GOOGLE_TEST_URL, GOOGLE_DEST])
         os.chdir(GOOGLE_DEST)
         script = ["cmake CMakeLists.txt",
-                   "make -j8",
-                   "sudo cp -r -v googletest/include/. /usr/include",
-                   "sudo cp -r -v googlemock/include/. /usr/include",
-                   "sudo chown -v root:root /usr/lib"]
+                  "make -j8",
+                  "sudo cp -r -v googletest/include/. /usr/include",
+                  "sudo cp -r -v googlemock/include/. /usr/include",
+                  "sudo chown -v root:root /usr/lib"]
         for command in script:
-          subprocess.run(command.split())
+            subprocess.run(command.split())
 
     def google_test_attempt(self):
         """
         Goal: small test to check if Google Test works after install
-        """ 
+        """
 
         TEST_URL = "https://github.com/JaredDyreson/tuffix-google-test.git"
         TEST_DEST = "test"
@@ -227,9 +238,9 @@ class BaseKeyword(AbstractKeyword):
         subprocess.check_output(['clang++', '-v', 'main.cpp', '-o', 'main'])
         ret_code = subprocess.run(['make', 'all']).returncode
         if(ret_code != 0):
-          print(colored("[ERROR] Google Unit test failed!", "red"))
+            print(colored("[ERROR] Google Unit test failed!", "red"))
         else:
-          print(colored("[SUCCESS] Google unit test succeeded!", "green"))
+            print(colored("[SUCCESS] Google unit test succeeded!", "green"))
 
     def google_test_all(self):
         """
@@ -251,7 +262,7 @@ class ChromeKeyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'chrome', 'Google Chrome')
- 
+
     def add(self):
         google_chrome = "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
         dest = "/tmp/chrome.deb"
@@ -268,10 +279,12 @@ class ChromeKeyword(AbstractKeyword):
 
         with open(google_sources_path, 'wb') as fp:
             fp.write(requests.get(google_sources).content)
-        subprocess.check_output(f'sudo apt-key add {google_sources_path}'.split())
+        subprocess.check_output(
+            f'sudo apt-key add {google_sources_path}'.split())
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class C121Keyword(AbstractKeyword):
 
@@ -279,13 +292,14 @@ class C121Keyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'C121', 'CPSC 121 (Object-Oriented Programming)')
- 
+
     def add(self):
         # edit_deb_packages(self.packages, is_installing=True)
         edit_deb_packages(self.packages, is_installing=True)
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class C223JKeyword(AbstractKeyword):
 
@@ -304,12 +318,13 @@ class C223JKeyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'C223J', 'CPSC 223J (Java Programming)')
- 
+
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class C223NKeyword(AbstractKeyword):
     """
@@ -321,12 +336,13 @@ class C223NKeyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'C223N', 'CPSC 223N (C# Programming)')
- 
+
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class C223PKeyword(AbstractKeyword):
     """
@@ -348,15 +364,16 @@ class C223PKeyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'C223P', 'CPSC 223P (Python Programming)')
- 
+
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
 
+
 class C223WKeyword(AbstractKeyword):
-    
+
     """
     Point person: Paul Inventado
     """
@@ -379,7 +396,7 @@ class C223WKeyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'C223W', 'CPSC 223W (Swift Programming)')
- 
+
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
 
@@ -398,12 +415,13 @@ class C240Keyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'C240', 'CPSC 240 (Assembler)')
- 
+
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class C351Keyword(AbstractKeyword):
 
@@ -432,6 +450,7 @@ class C351Keyword(AbstractKeyword):
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
 
+
 class C439Keyword(AbstractKeyword):
 
     """
@@ -449,6 +468,7 @@ class C439Keyword(AbstractKeyword):
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
 
+
 class C474Keyword(AbstractKeyword):
 
     """
@@ -460,15 +480,16 @@ class C474Keyword(AbstractKeyword):
                 'mpich',
                 'openmpi-bin',
                 'openmpi-common']
-    
+
     def __init__(self, build_config):
         super().__init__(build_config, 'C474', 'CPSC 474 (Parallel and Distributed Computing)')
-         
+
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
-        
+
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class C481Keyword(AbstractKeyword):
 
@@ -486,7 +507,7 @@ class C481Keyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'C481', 'CPSC 481 (Artificial Intelligence)')
- 
+
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
         """
@@ -503,10 +524,12 @@ class C481Keyword(AbstractKeyword):
         with open(eclipse_download, 'wb') as fp:
             r = requests.get(eclipse_link)
             if(r.status_code == 404):
-                raise EnvironmentError("cannot access link to get Eclipse, please tell your instructor immediately")
+                raise EnvironmentError(
+                    "cannot access link to get Eclipse, please tell your instructor immediately")
             fp.write(r.content)
         os.mkdir("/tmp/eclipse")
-        subprocess.check_output(f'tar -xzvf {eclipse_download} -C /tmp/eclipse'.split())
+        subprocess.check_output(
+            f'tar -xzvf {eclipse_download} -C /tmp/eclipse'.split())
         """
         Here is where I need help
         https://linoxide.com/linux-how-to/learn-how-install-latest-eclipse-ubuntu/
@@ -515,6 +538,7 @@ class C481Keyword(AbstractKeyword):
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class C484Keyword(AbstractKeyword):
 
@@ -535,16 +559,17 @@ class C484Keyword(AbstractKeyword):
                 'mesa-utils-extra',
                 'openctm-doc',
                 'openctm-tools']
-                # 'python-openctm']
+    # 'python-openctm']
 
     def __init__(self, build_config):
         super().__init__(build_config, 'C484', 'CPSC 484 (Principles of Computer Graphics)')
- 
+
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class MediaKeyword(AbstractKeyword):
 
@@ -557,12 +582,13 @@ class MediaKeyword(AbstractKeyword):
 
     def __init__(self, build_config):
         super().__init__(build_config, 'media', 'Media Computation Tools')
- 
+
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class LatexKeyword(AbstractKeyword):
     packages = ['texlive-full']
@@ -578,6 +604,7 @@ class LatexKeyword(AbstractKeyword):
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
 
+
 class SystemUpgradeKeyword(AbstractKeyword):
     packages = []
 
@@ -589,51 +616,61 @@ class SystemUpgradeKeyword(AbstractKeyword):
     def add(self):
         # edit_deb_packages(self.packages, is_installing=True)
         # TODO
-        # source : https://stackoverflow.com/questions/3092613/python-apt-get-list-upgrades
+        # source :
+        # https://stackoverflow.com/questions/3092613/python-apt-get-list-upgrades
         cache = apt.Cache()
         cache.update()
         cache.open(None)
         cache.upgrade()
-        for pkg in cache.get_changes(): # changed from getChanges
+        for pkg in cache.get_changes():  # changed from getChanges
             try:
                 if(pkg.isUpgradeable):
                     print(f'[INFO] Upgrading {pkg.sourcePackageName}....')
                     pkg.mark_install()
                     cache.commit()
             except Exception as error:
-                raise EnvironmentError(f'[ERROR] Could not install {pkg.sourcePackageName}. Got error of {error}')
-
+                raise EnvironmentError(
+                    f'[ERROR] Could not install {pkg.sourcePackageName}. Got error of {error}')
 
     def remove(self):
         print(f'[INFO] Nothing to remove for system upgrade, ignoring request')
         pass
         # edit_deb_packages(self.packages, is_installing=False)
 
+
 class VirtualBoxKeyword(AbstractKeyword):
     packages = ['virtualbox-6.1']
 
     def __init__(self, build_config):
-        super().__init__(build_config,
-                         'vbox',
-                         'A powerful x86 and AMD64/Intel64 virtualization product')
+        super().__init__(
+            build_config,
+            'vbox',
+            'A powerful x86 and AMD64/Intel64 virtualization product')
 
     def add(self):
         if(subprocess.run("grep hypervisor /proc/cpuinfo".split(), stdout=subprocess.DEVNULL).returncode == 0):
-            raise EnvironmentError("This is a virtual enviornment, not proceeding")
+            raise EnvironmentError(
+                "This is a virtual enviornment, not proceeding")
 
         sources_path = pathlib.Path("/etc/apt/sources.list")
         source_link = f'deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian {distrib_codename()} contrib'
         with open(sources_path, "a") as fp:
             fp.write(source_link)
 
-        wget_request = subprocess.Popen(("wget", "-q", "https://www.virtualbox.org/download/oracle_vbox_2016.asc", "-O-"),
-                                        stdout=subprocess.PIPE)
-        apt_key = subprocess.check_output(('sudo', 'apt-key', 'add', '-'), stdin=wget_request.stdout)
+        wget_request = subprocess.Popen(
+            ("wget",
+             "-q",
+             "https://www.virtualbox.org/download/oracle_vbox_2016.asc",
+             "-O-"),
+            stdout=subprocess.PIPE)
+        apt_key = subprocess.check_output(
+            ('sudo', 'apt-key', 'add', '-'), stdin=wget_request.stdout)
 
         edit_deb_packages(self.packages, is_installing=True)
 
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class ZoomKeyword(AbstractKeyword):
     packages = ['libgl1-mesa-glx',
@@ -657,6 +694,7 @@ class ZoomKeyword(AbstractKeyword):
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
 
+
 class TestKeyword(AbstractKeyword):
     packages = ['cowsay']
 
@@ -667,8 +705,10 @@ class TestKeyword(AbstractKeyword):
 
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
+
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
 
 class CustomKeyword(AbstractKeyword):
     # NOTE: these are not officially supported by the developers of Tuffix
@@ -687,24 +727,27 @@ class CustomKeyword(AbstractKeyword):
     """
 
     def __init__(self, build_config):
-        super().__init__(build_config,
-                         'custom',
-                         'run custom keywords given by an instructor or written by a student')
+        super().__init__(
+            build_config,
+            'custom',
+            'run custom keywords given by an instructor or written by a student')
 
     def add(self):
-        path = "/tmp/example.json" # some how loaded from CLI
+        path = "/tmp/example.json"  # some how loaded from CLI
         if(not os.path.exists(path)):
             raise EnvironmentError(f'[ERROR] Could not find {path}')
         with open(path, "r") as fp:
             content = json.load(fp)
-        name, instructor, self.packages = content["name"].replace(' ', ''), content["instructor"], content["packages"]
+        name, instructor, self.packages = content["name"].replace(
+            ' ', ''), content["instructor"], content["packages"]
 
-        print(f'[INFO] Installing custom keyword {name} from instructor/student {instructor}')
+        print(
+            f'[INFO] Installing custom keyword {name} from instructor/student {instructor}')
 
         edit_deb_packages(self.packages, is_installing=True)
+
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
-
 
 
 def all_keywords(build_config):
@@ -712,27 +755,28 @@ def all_keywords(build_config):
         raise ValueError
     # alphabetical order, but put digits after letters
     # TODO: all keywords commented out have not been fully developed
-    return [ AllKeyword(build_config),
-             BaseKeyword(build_config),
-             # CustomKeyword(build_config),
-             # ChromeKeyword(build_config),
-             # GeneralKeyword(build_config),
-             LatexKeyword(build_config),
-             ZoomKeyword(build_config),
-             # MediaKeyword(build_config),
-             # VirtualBoxKeyword(build_config),
-             # C223JKeyword(build_config),
-             # C223NKeyword(build_config),
-             # C223PKeyword(build_config),
-             # C223WKeyword(build_config),
-             # C240Keyword(build_config),
-             C121Keyword(build_config),
-             C439Keyword(build_config),
-             C474Keyword(build_config),
-             # C481Keyword(build_config), 
-             C484Keyword(build_config),
-             TestKeyword(build_config)
-             ]
+    return [AllKeyword(build_config),
+            BaseKeyword(build_config),
+            # CustomKeyword(build_config),
+            # ChromeKeyword(build_config),
+            # GeneralKeyword(build_config),
+            LatexKeyword(build_config),
+            ZoomKeyword(build_config),
+            # MediaKeyword(build_config),
+            # VirtualBoxKeyword(build_config),
+            # C223JKeyword(build_config),
+            # C223NKeyword(build_config),
+            # C223PKeyword(build_config),
+            # C223WKeyword(build_config),
+            # C240Keyword(build_config),
+            C121Keyword(build_config),
+            C439Keyword(build_config),
+            C474Keyword(build_config),
+            # C481Keyword(build_config),
+            C484Keyword(build_config),
+            TestKeyword(build_config)
+            ]
+
 
 def find_keyword(build_config, name):
     if not (isinstance(build_config, BuildConfig) and
@@ -741,4 +785,7 @@ def find_keyword(build_config, name):
     for keyword in all_keywords(build_config):
         if keyword.name == name:
             return keyword
-    raise UsageError('unknown keyword "' + name + '", see valid keyword names with $ tuffix list')
+    raise UsageError(
+        'unknown keyword "' +
+        name +
+        '", see valid keyword names with $ tuffix list')
