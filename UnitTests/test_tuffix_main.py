@@ -38,5 +38,18 @@ class TestTuffixMain(unittest.TestCase):
         else:
             self.assertTrue(False)
 
+    def test_install_test_package(self):
+        """
+        test if command does not work or the command is unavailable
+        """
+
+        try:
+            arguments = ["install", "test"]
+            main(DEFAULT_BUILD_CONFIG, argument)
+        except (MessageException, UsageError):
+            self.assertTrue(True)
+        else:
+            self.assertTrue(False)
+
 if __name__ == '__main__':
     unittest.main()

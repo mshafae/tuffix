@@ -8,11 +8,15 @@ from Tuffix.Configuration import BuildConfig, DEFAULT_BUILD_CONFIG
 from Tuffix.Exceptions import *
 from Tuffix.Status import *
 
+# result of os.uname() from Rapsberry Pi 3 B+
+
+# posix.uname_result(sysname='Linux', nodename='retropie', release='5.4.72-v7+', version='#1356 SMP Thu Oct 22 13:56:54 BST 2020', machine='armv7l')
+
 def print_usage(build_config):
     if not (isinstance(build_config, BuildConfig)):
         raise ValueError
     output = (
-        'tuffix {build_config.version}\n\n',
+        f'tuffix {build_config.version}\n\n',
         'usage:\n\n',
         '    tuffix <command> [argument...]\n\n',
         'where <command> and [argument...] match one of the following:\n'

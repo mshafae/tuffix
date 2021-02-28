@@ -9,6 +9,7 @@ from Tuffix.KeywordHelperFunctions import *
 from Tuffix.Status import *
 from zipfile import Zipfile
 import requests
+import json
 
 class AbstractKeyword:
     def __init__(self, build_config, name, description):
@@ -143,7 +144,7 @@ class BaseKeyword(AbstractKeyword):
             fp.write(vscode_ppa)
 
 
-    def configure_git(self):
+    def configure_git(self, username=None, mail=None):
         """
         GOAL: Configure git
         """
@@ -169,8 +170,8 @@ class BaseKeyword(AbstractKeyword):
 
         atom_url = "https://atom.io/download/deb"
         atom_dest = "/tmp/atom.deb"
-        atom_plugins = ['dbg-gdb', 
-                        'dbg', 
+        atom_plugins = ['dbg-gdb',
+                        'dbg',
                         'output-panel']
 
         executor = SudoRun()
@@ -409,13 +410,15 @@ class C351Keyword(AbstractKeyword):
     """
     Point person: William McCarthy
     """
-    # TODO
+    # TODO: testing and doing
+
     packages = [f'linux-headers-{current_kernel_revision()}']
 
     def __init__(self, build_config):
         super().__init__(build_config, 'C351', 'CPSC 351 (Operating Systems)')
 
     def add(self):
+        print('important that you make a save state in your VM of tuffix or just install the tuffix installers scripts in another VM if you have a native install. You can mess up your main OS')
         edit_deb_packages(self.packages, is_installing=True)
         silberschatz_url = "http://cs.westminstercollege.edu/~greg/osc10e/final-src-osc10e.zip"
         r = requests.get(silberschatz_url)
@@ -568,12 +571,43 @@ class LatexKeyword(AbstractKeyword):
         super().__init__(build_config,
                          'latex',
                          'LaTeX typesetting environment (large)')
-         
+
     def add(self):
         edit_deb_packages(self.packages, is_installing=True)
-        
+
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
+class SystemUpgradeKeyword(AbstractKeyword):
+    packages = []
+
+    def __init__(self, build_config):
+        super().__init__(build_config,
+                         'sysupgrade',
+                         'Upgrade the entire system')
+
+    def add(self):
+        # edit_deb_packages(self.packages, is_installing=True)
+        # TODO
+        # source : https://stackoverflow.com/questions/3092613/python-apt-get-list-upgrades
+        cache = apt.Cache()
+        cache.update()
+        cache.open(None)
+        cache.upgrade()
+        for pkg in cache.get_changes(): # changed from getChanges
+            try:
+                if(pkg.isUpgradeable):
+                    print(f'[INFO] Upgrading {pkg.sourcePackageName}....')
+                    pkg.mark_install()
+                    cache.commit()
+            except Exception as error:
+                raise EnvironmentError(f'[ERROR] Could not install {pkg.sourcePackageName}. Got error of {error}')
+
+
+    def remove(self):
+        print(f'[INFO] Nothing to remove for system upgrade, ignoring request')
+        pass
+        # edit_deb_packages(self.packages, is_installing=False)
 
 class VirtualBoxKeyword(AbstractKeyword):
     packages = ['virtualbox-6.1']
@@ -582,7 +616,7 @@ class VirtualBoxKeyword(AbstractKeyword):
         super().__init__(build_config,
                          'vbox',
                          'A powerful x86 and AMD64/Intel64 virtualization product')
-         
+
     def add(self):
         if(subprocess.run("grep hypervisor /proc/cpuinfo".split(), stdout=subprocess.DEVNULL).returncode == 0):
             raise EnvironmentError("This is a virtual enviornment, not proceeding")
@@ -591,13 +625,13 @@ class VirtualBoxKeyword(AbstractKeyword):
         source_link = f'deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian {distrib_codename()} contrib'
         with open(sources_path, "a") as fp:
             fp.write(source_link)
-        
+
         wget_request = subprocess.Popen(("wget", "-q", "https://www.virtualbox.org/download/oracle_vbox_2016.asc", "-O-"),
                                         stdout=subprocess.PIPE)
         apt_key = subprocess.check_output(('sudo', 'apt-key', 'add', '-'), stdin=wget_request.stdout)
 
         edit_deb_packages(self.packages, is_installing=True)
-        
+
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
 
@@ -611,7 +645,7 @@ class ZoomKeyword(AbstractKeyword):
         super().__init__(build_config,
                          'zoom',
                          'Video conferencing software')
-         
+
     def add(self):
         edit_deb_packages(self.packages[:3], is_installing=True)
         url = "https://zoom.us/client/latest/zoom_amd64.deb"
@@ -619,7 +653,7 @@ class ZoomKeyword(AbstractKeyword):
         with open(file_path, 'wb') as fp:
             fp.write(requests.get(url).content)
         apt.debfile.DebPackage(filename=file_path).install()
-        
+
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
 
@@ -630,12 +664,48 @@ class TestKeyword(AbstractKeyword):
         super().__init__(build_config,
                          'test',
                          'for testing purposes')
-         
+
     def add(self):
-        # edit_deb_packages(self.packages, is_installing=True)
         edit_deb_packages(self.packages, is_installing=True)
     def remove(self):
         edit_deb_packages(self.packages, is_installing=False)
+
+class CustomKeyword(AbstractKeyword):
+    # NOTE: these are not officially supported by the developers of Tuffix
+    # this is merely to allow flexibility
+    # TODO : testing
+
+    """
+    IDEA: if you have multiple instructors wanting to have different configurations for the same class
+    Use a json file that can be loaded
+
+    {
+        "name": "Under Water Basket Weaving",
+        "instructor": "Tony Stark",
+        "packages": ["needles", "wool", "scuba-mask"]
+    }
+    """
+
+    def __init__(self, build_config):
+        super().__init__(build_config,
+                         'custom',
+                         'run custom keywords given by an instructor or written by a student')
+
+    def add(self):
+        path = "/tmp/example.json" # some how loaded from CLI
+        if(not os.path.exists(path)):
+            raise EnvironmentError(f'[ERROR] Could not find {path}')
+        with open(path, "r") as fp:
+            content = json.load(fp)
+        name, instructor, self.packages = content["name"].replace(' ', ''), content["instructor"], content["packages"]
+
+        print(f'[INFO] Installing custom keyword {name} from instructor/student {instructor}')
+
+        edit_deb_packages(self.packages, is_installing=True)
+    def remove(self):
+        edit_deb_packages(self.packages, is_installing=False)
+
+
 
 def all_keywords(build_config):
     if not isinstance(build_config, BuildConfig):
@@ -644,6 +714,7 @@ def all_keywords(build_config):
     # TODO: all keywords commented out have not been fully developed
     return [ AllKeyword(build_config),
              BaseKeyword(build_config),
+             # CustomKeyword(build_config),
              # ChromeKeyword(build_config),
              # GeneralKeyword(build_config),
              LatexKeyword(build_config),

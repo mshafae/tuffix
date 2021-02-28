@@ -67,6 +67,10 @@ def ensure_root_access():
     if os.getuid() != 0:
         raise UsageError('you do not have root access; run this command like $ sudo tuffix ...')
 
+def ensure_ubuntu():
+    if not(os.path.exists("/etc/debian_release")):
+        raise UsageError('this is not an Debian derivative, please try again')
+
 def ensure_shell_command_exists(name):
     """
     Raise EnvironemntError if the given shell command name is not an executable
@@ -93,6 +97,8 @@ def create_state_directory(build_config):
     os.makedirs(dir_path, exist_ok=True)
 
 def set_background(path: str):
+    # source: https://itectec.com/ubuntu/ubuntu-how-to-change-the-wallpaper-using-a-python-script/
+
     if not(isinstance(path, str)):
         raise ValueError
 
@@ -113,6 +119,8 @@ def set_background(path: str):
     gsettings.set_string(KEY, f'file://{path}')
 
 def get_user_submitted_wallpaper():
+    # making a rest API for this
+
     pictures_directory = f'{Path.home()}/Pictures/Wallpapers'
     url = "https://speckyboy.com/wp-content/uploads/2020/11/high-resolution-4k-desktop-wallpaper-03.jpg"
     name = "SpacialRend"

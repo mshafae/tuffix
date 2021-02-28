@@ -24,3 +24,4 @@ def edit_deb_packages(package_names, is_installing):
         cache.commit()
     except Exception as e:
         raise EnvironmentError(f'[ERROR] Could not install {name}: {e}.')
+
